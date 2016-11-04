@@ -6,21 +6,23 @@ function showSvcPage(serviceId) {
 	g_curSvc = serviceId;
     $('#monitorObject').html("");
 	$("#grid").hide();
+	initServicePage(serviceId);
+}
+
+function initServicePage(serviceId) {
 	var curObj = g_svcStatus.get(serviceId);
 	var serviceInfo = "版本号：{0}  启动时间：{1}".format(curObj.version, curObj.uptime);
 	$('#serviceInfo').text(serviceInfo);
 	$('#serviceName').text(serviceId);
 	if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
 	{
-		$("#svcControl").html("停止服务");
+		$("#startIcon").css({"color":"#BEBFC0"});
+		$("#stopIcon").css({"color":"red"});
 	}
 	else //当前为服务停止状态，点击后启动服务
 	{
-		$("#svcControl").html("启动服务");
-	}
-	var cNode =document.getElementById('sidebar').getElementsByTagName('li');
-	for( var i=0; i<cNode.length; i++){
-		cNode[i].setAttribute('class', '');
+		$("#startIcon").css({"color":"green"});
+		$("#stopIcon").css({"color":"#BEBFC0"});
 	}
 }
 
@@ -45,9 +47,12 @@ function ShowListSvcItem(str, serviceId)
       var monObjs = "";
       for (var i=0;i<records.length;i++)
       {
-          var rec = records[i];
-          var monObj = "<li role=\"presentation\" ><a href=\"#\" onclick=\"ListSvcItemInfo('{0}','{1}')\">{2}</a></li>".format(serviceId, rec.id,rec.name);
-          monObjs += monObj;
+		  var rec = records[i];
+		  if ( rec.show == 1)
+		  {
+			  var monObj = "<li role=\"presentation\" ><a href=\"#\" onclick=\"ListSvcItemInfo('{0}','{1}')\">{2}</a></li>".format(serviceId, rec.id,rec.name);
+         	 monObjs += monObj;
+		  }
       }
       $('#monitorObject').html(monObjs);
 }

@@ -55,11 +55,11 @@ function dealListSvcLog(data) {
 		}
 		var li = "<li class=\"list-group-item {0}\">{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);	
 		logArea.append(li);
-		var lis=logArea.getElementsByTagName("li");
-		if (lis.length > g_maxLogNum)
-		{
-			lis[0].remove();
-		}
+		// var lis=logArea
+		// if (lis.length > g_maxLogNum)
+		// {
+		// 	lis[0].remove();
+		// }
  	}
  	
 }
@@ -133,13 +133,13 @@ function dealListSvc(data)
 		{
 			if (svcObj.status_run == 1) //当前为启动状态，点击后停止服务
 			{
-				$("#startIcons").css("color", "#BEBFC0");
-				$("#stopIcon").css("color", "red");
+				$("#startIcon").css({"color":"#BEBFC0"});
+				$("#stopIcon").css({"color":"red"});
 			}
 			else //当前为服务停止状态，点击后启动服务
 			{
-				$("#startIcons").css("color", "green");
-				$("#stopIcon").css("color", "#BEBFC0");
+				$("#startIcon").css({"color":"green"});
+				$("#stopIcon").css({"color":"#BEBFC0"});
 			}
 		}
  	}
@@ -219,13 +219,15 @@ function dealRemoveService(response) {
 	var code = parseInt(rsp.code);
 	if (code == 0)
 	{
-		$('#removeResultContent').val("服务删除成功！");
+		$('#removeResultContent').text("服务删除成功！");
 		$('#removeResultDlg').modal('show');
+		$('#myTab a:first').tab('show');
 	}
 	else{
-		$('#removeResultContent').val("服务删除失败！");
+		$('#removeResultContent').text("服务删除失败！");
 		$('#removeResultDlg').modal('show');
 	}
+
 }
 
 function showRemoveConfirmDlg(serviceId) {
