@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Apex 监控</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/bootstrap.min.css" />
+<link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+<!--bootstrap file input-->
+<link rel="stylesheet" href="css/fileinput.css" />
+<link rel="stylesheet" href="css/monitor.css">
+    <link rel="stylesheet" href="Grid/pqgrid.min.css" />
+    <!--PQ Grid Office theme-->
+    <link rel="stylesheet" href="Grid/themes/office/pqgrid.css" />
+</head>
+<body style="background-color: #E6E6E6">
+
+<nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px; ">
+    <div class="container-fluid">
+        <div class="navbar-header" style="background-color: blue">
+            <a href="#" class="navbar-brand"><img src="img/logo.png" class="img-responsive"></a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="#mainPage" data-toggle="tab"><span class="glyphicon glyphicon-home"></span>  监控服务</a></li>
+            <li class="dropdown">
+                <a href="#" id = "maiatance" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span>   维护<b class="caret"> </b></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="maiatance">
+                    <li><a href="#addServiceTab" data-toggle="tab"><span class="glyphicon glyphicon-plus"></span> 增加服务</a></li>
+                    <li><a href="#removeServiceTab" data-toggle="tab" onclick="loadRemoveServiceList()"><span class="glyphicon glyphicon-minus"></span> 删除服务</a></li>
+                    <li><a href="#modServiceTab" data-toggle="tab"><span class="glyphicon glyphicon-pencil"></span> 修改服务</a></li>
+                    <li><a href="#updateBinTab" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
+                </ul>
+            </li>
+            <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
+            <li class="disabled"><a id = "loginUserName" href="#" >  用户</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid">
+<div class="row" style="margin-left: 0px;margin-right: 0px;margin-top: 60px; margin-bottom: 10px; background-color: #FFFFFF">
+    <div id="sidebar" class="list-group col-lg-2 col-md-2" style="padding-right: 0px">
+    </div>
+  <div id="content" class="col-lg-10 col-md-10 tab-content" style="padding: 0px">
+      <div id = "mainPage" class="tab-pane fade in active">
+            <p> This is Main Page!</p>
+      </div>
+      <div id="monitorTab" class="tab-pane fade">
+          <div class="panel panel-default">
+              <div class="panel-heading" style="padding: 0px">
+                 <div class="row">
+                      <div class="col-lg-2 col-md-2">
+                          <h4 id = "serviceName">&nbsp;&nbsp;&nbsp;service title</h4>
+                      </div>
+                      <div class="col-lg-3 col-md-3 col-lg-offset-7">
+                           <h5 id = "serviceInfo">版本号:3.3.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启动时间:2015-09-09</h5>
+                      </div>
+                  </div>
+              </div>
+              <div class="panel-heading" style="background: #E4ECF7; padding: 5px 10px 5px 10px">
+                  <div class="form-inline">
+                       <a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>
+                       <a href="#" onclick="startService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px;"></span></a>
+                       <a href="#" onclick="stopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
+                      <a href="#" class="pull-right input-group-addon" onclick="alert('OK')" style="margin-top: -5px;"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
+                      <input type="text" class="pull-right" style="margin-top: -3px; width: 300px">
+
+                   </div>
+              </div>
+              <div class="panel-body">
+                   <ul id = "monitorObject" class="nav nav-tabs nav-justified" role="tablist">
+                  </ul>
+                  <div id="grid">
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div id = "addServiceTab" class="tab-pane fade">
+          <label class="control-label"> 请上传新增服务的配置文件(bin目录)</label>
+          <input id = "input-svcXML" type="file" class="file" data-show-preview="false">
+          <label class="control-label"> 上传服务组件(svc目录)</label>
+          <input id = "input-so" type="file" class="file" data-show-preview="false" data-allowed-file-extensions='["xml", "txt"]'>
+          <button id = "addService" type="button" class="btn btn-default" onclick="addService()">添加服务</button>
+      </div>
+      <div id = "removeServiceTab" class="tab-pane fade">
+          <h3>this is remove maintance Tab!</h3>
+          <div class="row-fluid">
+              <div id = "removeSvcList" class="list-group col-lg-6 col-md-6">
+              </div>
+              <div class="modal fade" id="removeConfirm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                 <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">服务删除提示</h4>
+                      </div>
+                      <div id="removeTip" class="modal-body">
+                        您确认要删除该服务吗？
+                      </div>
+                      <div class="modal-footer">
+                        <button id ="confirmRemoveServiceBtn" type="button" class="btn btn-default" data-dismiss="modal">确认删除</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">取消</button>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+
+              <div id="removeResultDlg" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div id="removeResultContent" class="modal-content">
+                      服务删除成功！
+                    </div>
+                  </div>
+              </div>
+
+          </div>
+
+      </div>
+      <div id = "modServiceTab" class="tab-pane fade">
+          <h3>this is mod maintance Tab!</h3>
+      </div>
+      <div id = "updateBinTab" class="tab-pane fade">
+          <h3>this is UPDATE maintance Tab!</h3>
+      </div>
+  </div>
+</div>
+
+<div class="row" style="margin-left: 0px;margin-right: 0px">
+   <div class="panel panel-default">
+       <div class="panel-heading" style="padding: 0px; background: white">
+           <h5>&nbsp;&nbsp;&nbsp;系统实时日志</h5>
+       </div>
+       <div class="panel-body " style="padding:0px 0px 15px 15px" >
+        <dl class="dl-horizontal">
+          <dt style="background-color: #FAFAFA; width: 30px; height: 300px">
+              <ul class="list-unstyled center-block" style="">
+                <li><span class="glyphicon glyphicon-info-sign" style="color: cornflowerblue; margin: 5px 8px 5px 8px"></span></li>
+                <li><span class="glyphicon glyphicon-info-sign" style="color: sandybrown; margin: 5px 8px 5px 8px"></span></li>
+                <li><span class="glyphicon glyphicon-remove-circle" style="color: red; margin: 5px 8px 5px 8px"></span></li>
+              </ul>
+          </dt>
+            <div style="background-color: white; overflow: scroll;height: 300px">
+                <ul id = "logArea" class="list-group">
+                </ul>
+            </div>
+        </dl>
+
+       </div>
+    </div>
+</div>
+
+</div>
+<script src="js/jquery.js"></script>
+<script src="jquery-ui/jquery-ui.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/fileinput.js"></script>
+<script src="Grid/pqgrid.min.js"></script>
+<script src="js/base64.js"></script>
+<script src="js/common.js"></script>
+<script src="index.js"></script>
+<script src="Svc/showSvcPage.js"></script>
+</body>
+</html>
