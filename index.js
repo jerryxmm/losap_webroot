@@ -96,7 +96,7 @@ function dealListSvc(data)
 	var obj = JSON.parse(data);
  	var head = obj.metadata;
  	var records = obj.records;
-	var svrLst = "";
+	var svrLst = "<ul style=\"display: block;\">";
 	var color;
 	var curRecord;
 	var icon;
@@ -123,7 +123,7 @@ function dealListSvc(data)
 			alertFlag = "";
 		}
 
-		var svc =  "<a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick=\"showSvcPage('{0}')\"><span class='glyphicon {1}' style='color:{2}'></span>{3} {4}</a>"
+		var svc =  "<li><a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick=\"showSvcPage('{0}')\"><span class='glyphicon {1}' style='color:{2}'></span>{3} {4}</a></li>"
 		.format(curRecord.svc_name,icon, color, curRecord.svc_name, alertFlag);
 		svrLst += svc;
 		var svcObj = curRecord;
@@ -143,6 +143,8 @@ function dealListSvc(data)
 			}
 		}
  	}
+
+	svrLst +="</ul>"
 	$('#sidebar').html(svrLst);
 	g_freshStateFlag = true;
 }
@@ -183,35 +185,23 @@ function stopService() {
 
 function addService() {
     var para = {};
-    var xmlfiles = $('#input-svcXML').fileinput('getFileStack');
-    if (xmlfiles.length == 0)
+    var pkg = $('#file').fileinput('getFileStack');
+    if (pkg.length == 0)
         $('#addService').popover('请选择服务配置文件！')
-    para.xml_name = xmlfiles[0].name;
-    var reader = new FileReader();
-    reader.readAsText(xmlfiles[0]);
-    reader.onload = function () {
-        var xmlContent = this.result;
-        var soFiles = $('#input-so').fileinput("getFileStack");
-        if (soFiles.length > 0 )
-        {
-            //var reader2 = new FileReader();
-             reader.readAsBinaryString(soFiles[0]);
-            para.so_file_name = soFiles[0].name;
-            reader.onload = function () {
-                var soFileContent;
-                soFileContent = this.result;
-                para.svc_xml = base64encode(xmlContent);
-                para.so_file = base64decode(soFileContent);
-                sendAddSvc(para);
-            }
-        }
-        para.svc_xml = base64encode(xmlContent);
-        sendAddSvc(para);
-    }
-}
+    para.package_name = pkg[0].name;
 
-function sendAddSvc(para) {
-    getMonitorData(g_actionMonitorUrl, "AddSvc", '1.0', para, "NULL");
+	$("#addServiceForm").submit(function () {
+		$.ajax({
+		type: "POST",
+		action: "/action/uploadFile",
+		enctype:"multipart/form-data",
+		data: $(this).serialize(),
+		  success: function(response, xml) {
+			 getMonitorData(g_actionMonitorUrl, "AddSvc", '1.0', para, "NULL");
+		   }
+		})
+	});
+	$("#addServiceForm").submit();
 }
 
 function dealRemoveService(response) {
@@ -227,7 +217,6 @@ function dealRemoveService(response) {
 		$('#removeResultContent').text("服务删除失败！");
 		$('#removeResultDlg').modal('show');
 	}
-
 }
 
 function showRemoveConfirmDlg(serviceId) {
@@ -249,5 +238,26 @@ function loadRemoveServiceList() {
 		items += item;
 	}
 	$("#removeSvcList").html(items);
+}
+
+function updateBin() {
+	var para = {};
+	var package = $('#updatePackage').fileinput('getFileStack');
+    if (package.length == 0)
+        $('#addService').popover('请选择服务配置文件！')
+    para.package_name = package[0].name;
+		$("#updateBinForm").submit(function () {
+		$.ajax({
+		type: "POST",
+		action: "/action/uploadFile",
+		enctype:"multipart/form-data",
+		data: $(this).serialize(),
+		success: function(response, xml) {
+			  console.log("upload file finish!");
+			 getMonitorData(g_actionMonitorUrl, "UpdateCmd", '1.0', para, "NULL");
+		   }
+		})
+	});
+	$("#updateBinForm").submit();
 }
 

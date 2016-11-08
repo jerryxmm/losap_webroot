@@ -1,6 +1,34 @@
-/*.navbar-nav>li>a{*/
-	/*color: white;*/
-/*}*/
-/*.navbar-nav li:hover{*/
-	/*background: #02547D;*/
-/*}*/
+/* Sidebar Navigation */
+#sidebar {
+	display: block;
+}
+#sidebar >ul{
+    padding: 0px;
+}
+#sidebar > ul > li {
+	display: block;
+}
+
+#sidebar > ul > li.active > a {
+	background: url("../images/menu-active.png") no-repeat scroll right center transparent !important;
+	text-decoration:none;
+}
+
+#sidebar > ul li ul {
+	display: none;
+	margin: 0;
+	padding: 0;
+}
+#sidebar > ul li.open ul {
+	display: block;
+}
+#sidebar > ul li ul li a {
+	display: block;
+	color: #777777;
+}
+#sidebar > ul li ul li:first-child a {
+	border-top: 0;
+}
+#sidebar > ul li ul li:last-child a {
+	border-bottom: 0;
+}
