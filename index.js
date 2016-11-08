@@ -12,8 +12,21 @@ var g_curSvc = "";
 $(function(){
 	setLoginUser();
 	freshSvcState();
-	setInterval("freshSvcState()",g_updateLag);
-	setInterval("GetLog()",g_updateLag);
+	//setInterval("freshSvcState()",g_updateLag);
+	//setInterval("GetLog()",g_updateLag);
+
+	// $('#mainPageId').on('shown.bs.tab', function (e) {
+	//   e.target // newly activated tab
+	//   e.relatedTarget // previous active tab
+	// 	$('#sidebar').hide();
+	// })
+
+
+	$('#updatePackage').on('fileuploaded', function(event, data, previewId, index) {
+    var form = data.form, files = data.files, extra = data.extra,
+        response = data.response, reader = data.reader;
+    console.log('File uploaded triggered');
+});
 });
 
 function GetLog() {

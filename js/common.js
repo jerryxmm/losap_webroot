@@ -201,5 +201,4 @@ function GetMonitorFile(filePath)
             });
         }
     }
-
 }

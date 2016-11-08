@@ -69,39 +69,38 @@ function ListSvcItemInfo(serviceId, obj)
 function ShowListSvcInfo(varData)
 {
 	// var table = parseJsonToTable(varData);
-	// $("#grid").html(table);
+	 $('#table').bootstrapTable('destroy');
 
      var table = JSON.parse(varData);
       if (table.metadata == undefined)
       {
-      	$("#grid").hide();
       	return;
       }
       var metadata = table.metadata;
       var data = table.records;
       var head = [];
+	  var rec = {};
       for(var i = 0; i < metadata.length; i++)
       {
-      	var headCol = {title: metadata[i].ColDesc, width: 100,dataIndx: metadata[i].ColName, align: "right"};
-      	head.push(headCol);
+		  var headCol = {title: metadata[i].ColDesc,field: metadata[i].ColName};
+      	  head.push(headCol);
       }
-      var obj = {
-		         // width: 1000,
-		         // minWidth:1000,
-		         flexWidth: true,
-      	 		  height: 500,
-      	 		  title: "Result" ,
-      	 		  pageModel: {type: "local", rPP:20, strRpp:"{0}", strDisplay:"{0} to {1} of {2}"},
-      	 		  numberCell: { resizable: true, title: "#" },
-      	 		  resizable:true,
-      	 		  draggable:true,
-		          viewrecords: true,
-		          editable:false,
-      	 		  colModel: head,
-      	 		  dataModel:{ data: data }
-      	 		};
-	$("#grid").show();
-    $("#grid").pqGrid(obj);
+	$.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['zh-CN']);
+	$('#table').bootstrapTable({
+		columns:head,
+		data:data,
+		striped: true,
+		pagination: true,
+		pageSize: 10,
+		showRefresh: true,
+		showToggle: true,
+		cardView: false,
+		showPaginationSwitch:true,
+		detailView: true,
+		showExport: false,
+		exportDataType: "basic",
+		search:true,
+	});
 }
 
 function ListSvcInfo(serviceId)
