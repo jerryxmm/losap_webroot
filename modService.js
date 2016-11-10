@@ -70,7 +70,6 @@ function dealListSvc(data)
 			}
 		}
  	}
-
 	svrLst +="</ul>"
 	return svrLst;
 }
@@ -85,33 +84,43 @@ function traverseNode(node, layer) {
     if (node.nodeName == "#text")
         return;
 	var desc = "";
-    if (node.hasAttribute("ps"))
-    {
-		desc = "项:"+ node.nodeName + "    描述:" + node.getAttribute("ps");
-        console.log(node.nodeName + node.getAttribute("ps"));
-    }
-	else{
-		desc = "项:"+ node.nodeName;
+	var atts = node.attributes;
+	if (layer != 1)
+	{
+		if (atts != undefined)
+		{
+			desc = node.nodeName;
+			if (node.hasAttribute("ps"))
+			{
+					desc = desc + "--" + node.getAttribute("ps");
+			}
+
+			for(var i = 0; i < atts.length; i++)
+			{
+				var att = atts[i];
+				console.log(att.name + "***"+att.nodeValue);
+				if (att.name == "ps") {
+					continue
+				}
+				else if (att.name == "Value")
+				{
+					var length =node.getAttribute("Value").length * 5;
+					$("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px' attr = '{3}'>{1}</div>"
+						.format(att.nodeValue, desc, node.nodeName,att.name));
+				}
+				else
+				 {
+					 $("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px'  attr = '{3}'>{1}</div>"
+						.format(att.nodeValue, att.name, node.nodeName, att.name));
+				 }
+			}
+		}
 	}
 
-	if (node.hasAttribute("Value"))
+	if (layer == 2)
 	{
-		$("#content").append("<div class='list-inline'><p>{1}</p> <input type='text' value='{0}'></div>".format(node.getAttribute("Value"), desc));
+		$('#content').append("<h5 style=\"font-weight:bold;\">{0}</h5>".format(desc));
 	}
-	else
-	{
-		if (layer == 1)
-		{
-			$('#content').append("".format(desc));
-			$('#content').append("");
-			$('#content').append("<HR style=\"FILTER: alpha(opacity=100,finishopacity=0,style=2)\" width=\"80%\" color=#987cb9 SIZE=10>");
-		}
-		else if (layer == 2)
-		{
-			$('#content').append("<h5>{0}</h5>".format(desc));
-		}
-	}
-
     var children = node.childNodes;
     for(var i = 0; i < children.length; i++)
     {
@@ -121,13 +130,19 @@ function traverseNode(node, layer) {
 }
 
 var g_xmlDoc;
-function dealSvcXml(response) {
+function dealSvcXml(response, serviceId) {
     var obj = JSON.parse(response);
     var xml = obj.content;
 	parser=new DOMParser();
     g_xmlDoc=parser.parseFromString(xml,"text/xml");
 	$('#content').empty();
+	$('#curSvc').text(serviceId);
     traverseNode(g_xmlDoc.documentElement, 1);
+	$('.configValue').on('input', function() {
+		var node = g_xmlDoc.getElementsByTagName($(this).attr('name'));
+		var attr = $(this).attr('attr');
+		node[0].setAttribute(attr, $(this).val());
+	});
 }
 
 function saveXml() {
@@ -135,6 +150,11 @@ function saveXml() {
         return;
     var content = XML2String(g_xmlDoc);
     console.log(content);
+	var para = {};
+	var ddd = $('#curSvc');
+	para.service_id = ddd[0].innerText;
+	para.content = content;
+	getMonitorData(g_actionMonitorUrl, "SaveSvcXml", '1.0', para, "NULL");
 }
 
 function XML2String(xmlObject) {

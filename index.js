@@ -14,11 +14,6 @@ $(function(){
 	{
 		$('#myTab a[href="#{0}"]'.format(tab)).tab('show');
 	}
-	$('#updatePackage').on('fileuploaded', function(event, data, previewId, index) {
-    var form = data.form, files = data.files, extra = data.extra,
-        response = data.response, reader = data.reader;
-    console.log('File uploaded triggered');
-});
 });
 
 function initHomePage() {
@@ -149,27 +144,6 @@ function stopService() {
 }
 
 function addService() {
-    var para = {};
-    var pkg = $('#file').fileinput('getFileStack');
-    if (pkg.length == 0)
-        $('#addService').popover('请选择服务配置文件！')
-    para.package_name = pkg[0].name;
-
-	$("#addServiceForm").submit(function () {
-		$.ajax({
-		type: "POST",
-		async:false,
-		action: "/action/uploadFile",
-		enctype:"multipart/form-data",
-		data: $(this).serialize(),
-			statusCode: {505: function() {
-    alert('page not found');
-  }},
-		  success: function(response, xml) {
-			 getMonitorData(g_actionMonitorUrl, "AddSvc", '1.0', para, "NULL");
-		   }
-		})
-	});
 	$("#addServiceForm").submit();
 }
 
@@ -180,7 +154,7 @@ function dealRemoveService(response) {
 	{
 		$('#removeResultContent').text("服务删除成功！");
 		$('#removeResultDlg').modal('show');
-		$('#myTab a:first').tab('show');
+		//$('#myTab a:first').tab('show');
 	}
 	else{
 		$('#removeResultContent').text("服务删除失败！");
@@ -210,22 +184,5 @@ function loadRemoveServiceList() {
 }
 
 function updateBin() {
-	// var para = {};
-	// var package = $('#updatePackage').fileinput('getFileStack');
-    // if (package.length == 0)
-     //    $('#addService').popover('请选择服务配置文件！')
-    // para.package_name = package[0].name;
-	// 	$("#updateBinForm").submit(function () {
-	// 	$.ajax({
-	// 	type: "POST",
-	// 	action: "/action/uploadFile",
-	// 	enctype:"multipart/form-data",
-	// 	data: $(this).serialize(),
-	// 	success: function(response, xml) {
-	// 		  console.log("upload file finish!");
-	// 		 getMonitorData(g_actionMonitorUrl, "UpdateCmd", '1.0', para, "NULL");
-	// 	   }
-	// 	})
-	// });
 	$("#updateBinForm").submit();
 }

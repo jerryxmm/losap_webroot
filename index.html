@@ -123,9 +123,11 @@
           <!--<input type="file" id= "file" name="FileZip">-->
         </div>
         <div id = "removeServiceTab" class="tab-pane fade">
-          <h3>this is remove maintance Tab!</h3>
-          <div class="row-fluid">
-              <div id = "removeSvcList" class="list-group col-lg-6 col-md-6">
+            <div class="removeSvc">
+                <h3>删除服务列表</h3>
+            </div>
+          <div class="row-fluid removeSvc">
+              <div id = "removeSvcList" class="list-group col-lg-4 col-md-4">
               </div>
               <div class="modal fade" id="removeConfirm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
                  <div class="modal-dialog">
@@ -198,7 +200,7 @@
                 <li><span class="glyphicon glyphicon-remove-circle" style="color: red; margin: 5px 8px 5px 8px"></span></li>
               </ul>
           </dt>
-            <div style="background-color: white; overflow: scroll;height: 300px">
+            <div id = "logDiv" style="background-color: white; overflow: scroll;height: 300px">
                 <ul id = "logArea" class="list-group">
                 </ul>
             </div>

@@ -41,13 +41,20 @@
         <div class="row">
             <div id="sidebar" class="col-lg-2 col-md-2">
             </div>
-          <div id="content" class="col-lg-10 col-md-10" style="padding: 0px">
+          <div class="col-lg-10 col-md-10" style="padding: 0px">
               <div class="row">
-                    <h4 class="l">SVC配置服务</h4>
-                    <button type='button' class='btn btn-default r' onclick="saveXml()">保存配置文件</button>
+                  <div class="pull-left" style="margin-left: 1%; margin-top:20px ">
+                      <h4 id = "curSvc" style="font-weight:bold;">SVC配置服务</h4>
+                  </div>
+                  <div class="pull-right" style="margin-right: 3%;  margin-top:20px">
+                       <button type='button' class='btn btn-default' onclick="saveXml()">保存配置文件</button>
+                  </div>
               </div>
-              <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="80%" color=#987cb9 SIZE=10>
-              <input type="text" value="100" name="ttttt"><span class="label label-default">Default</span>
+              <HR style="margin-top: 0px;FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="100%" color=#987cb9 SIZE=10>
+              <input id="myTest" type="text" value="100">
+              <div  id="content">
+
+              </div>
           </div>
         </div>
     </div>

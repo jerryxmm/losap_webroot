@@ -141,25 +141,33 @@ function dealListSvcLog(data) {
 //	AXLOG_TYPE_DEBUG, 3
 	var type = "";
 	g_freshLogFlag = true;
-	var logArea = $('#logArea');
-
+	if (records == undefined)
+		return;
  	for(var i = 0 ; i < records.length; i++)
  	{
 		curRecord= records[i];
-		switch(curRecord.log_type)
+		var li = "";
+		if (curRecord.log_type.indexOf("WARN") >=0)
 		{
-			case 0: type = "list-group-item-info";break;
-			case 1: type = "list-group-item-warning";break;
-			case 2: type = "list-group-item-danger"; break;
-			case 3: type = "list-group-item-success"; break;
-			default:break;
+			li = "<li class=\"list-group-item list-group-item-warning\"><span class=\"glyphicon glyphicon-info-sign\" style=\"color: sandybrown;\"></span>{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);
 		}
-		var li = "<li class=\"list-group-item {0}\">{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);
-		logArea.append(li);
+		else if (curRecord.log_type.indexOf("INFO") >=0)
+		{
+			li = "<li class=\"list-group-item list-group-item-info\"><span class=\"glyphicon glyphicon-info-sign\" style=\"color: cornflowerblue;\"></span>{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);
+		}
+		else if (curRecord.log_type.indexOf("ERROR") >=0)
+		{
+			li = "<li class=\"list-group-item list-group-item-danger\"><span class=\"glyphicon glyphicon-remove-circle\" style=\"color: red;\"></span>{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);
+		}
+		else{
+			li = "<li class=\"list-group-item\">{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);
+		}
+		$('#logArea').append(li);
 		// var lis=logArea
 		// if (lis.length > g_maxLogNum)
 		// {
 		// 	lis[0].remove();
 		// }
  	}
+	$('#logDiv').scrollTop($('#logDiv').prop("scrollHeight"));
 }
