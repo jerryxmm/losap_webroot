@@ -1,27 +1,19 @@
-var g_updateLag = 3000; //刷新间隔时间
-var g_freshStateFlag = true;
-var g_freshLogFlag = true;
-var g_logFileLocation = {};
-var g_maxLogNum = 2000;
-var num = 0;
-var g_getStateUrl = "/action/getstate";
-var g_actionMonitorUrl = "/action/actionMonitor";
-var g_svcStatus = new Map();
-var g_curSvc = "";
 
 $(function(){
 	setLoginUser();
 	freshSvcState();
-	//setInterval("freshSvcState()",g_updateLag);
-	//setInterval("GetLog()",g_updateLag);
-
-	// $('#mainPageId').on('shown.bs.tab', function (e) {
+	setInterval("freshSvcState()",g_updateLag);
+	setInterval("GetLog()",g_updateLag);
+	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	//   e.target // newly activated tab
 	//   e.relatedTarget // previous active tab
-	// 	$('#sidebar').hide();
+	// 	initHomePage();
 	// })
-
-
+	var tab = getQueryString("tab");
+	if (tab != null)
+	{
+		$('#myTab a[href="#{0}"]'.format(tab)).tab('show');
+	}
 	$('#updatePackage').on('fileuploaded', function(event, data, previewId, index) {
     var form = data.form, files = data.files, extra = data.extra,
         response = data.response, reader = data.reader;
@@ -29,71 +21,26 @@ $(function(){
 });
 });
 
-function GetLog() {
-	if (Boolean(g_freshLogFlag))
-	{
-		var para = {file_location:g_logFileLocation};
-		getMonitorData(g_getStateUrl,"ListSvcLog", '1.0', para, dealListSvcLog);
-		g_freshLogFlag = false;
+function initHomePage() {
+	$("#svcView").empty();
+	for (var [key, value] of g_svcStatus) {
+	  createSvcViewItem(key, value);
 	}
 }
-function dealListSvcLog(data) {
-	var obj = JSON.parse(data);
- 	var head = obj.metadata;
- 	var records = obj.records;
-	var svrLst = "";
-	svrLst += '<ul>';
-	var color;
-	var curRecord;
-	var icon;
-	g_logFileLocation = obj.file_location;
-//	AXLOG_TYPE_INFO, 0
-//	AXLOG_TYPE_WARN, 1
-//	AXLOG_TYPE_ERROR, 2
-//	AXLOG_TYPE_DEBUG, 3
-	var type = "";
-	g_freshLogFlag = true;
-	var logArea = $('#logArea');
-	
- 	for(var i = 0 ; i < records.length; i++)
- 	{
-		curRecord= records[i];
-		switch(curRecord.log_type)
-		{
-			case 0: type = "list-group-item-info";break;
-			case 1: type = "list-group-item-warning";break;
-			case 2: type = "list-group-item-danger"; break;
-			case 3: type = "list-group-item-success"; break;
-			default:break;
-		}
-		var li = "<li class=\"list-group-item {0}\">{1} {2} {3} {4}</li>".format(type, curRecord.log_time, curRecord.log_type, curRecord.svc, curRecord.note);	
-		logArea.append(li);
-		// var lis=logArea
-		// if (lis.length > g_maxLogNum)
-		// {
-		// 	lis[0].remove();
-		// }
- 	}
- 	
+function createSvcViewItem(svcName, value) {
+	var image = "";
+	if (value.status_run == 1)
+	{
+		image = "images/jdzt_green_pic.png";
+	}
+	else
+	{
+		image = "images/jdzt_red_pic.png";
+	}
+	var node = "<div class=\"col-lg-2 jkjd_fw\"><div class=\"jkjd_name\"><span class=\"r tc\"><img src=\"{0}\" /></span><div class=\"jkjd_fwname\"><a href='#'>{1}</a></div></div><div class=\"jkjd_yj tc\">当前<font>0</font>条预警</div></div>".format(image,svcName);
+	$("#svcView").append(node);
 }
 
-
-//设置用户名
-function setLoginUser()
-{
-	var xmlhttp = sendRequest("/action/getLoginUser", 'GET',  "application/x-www-form-urlencoded", "");
-	xmlhttp.onreadystatechange=function()  
-	  {  
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-	   	{
-	   		console.log(xmlhttp.responseText);
-		 //举个例子,如果结果是1代表登录成功跳转到index.html，并保存用户名否则提示登录失败消息
-		  var user=xmlhttp.responseText;
-            var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + user;
-		  $('#loginUserName').html(user);
-	    }  
-	  }   
-}
 
 function SVCInfo(status, status_run, status_alert, version, uptime)
 {
@@ -102,6 +49,21 @@ function SVCInfo(status, status_run, status_alert, version, uptime)
 	this.status_alert = status_alert;
 	this.version = version;
 	this.uptime = uptime;
+}
+
+function freshSvcState() {
+	if (Boolean(g_freshStateFlag))
+	{
+		getMonitorData(g_getStateUrl,"ListSvc", '1.0', "NULL", dealHomeListSvc);
+		g_freshStateFlag = false;
+	}
+}
+
+function dealHomeListSvc(data) {
+	var svrLst = dealListSvc(data);
+	$('#sidebar').html(svrLst);
+	g_freshStateFlag = true;
+	initHomePage();
 }
 
 function dealListSvc(data)
@@ -135,7 +97,6 @@ function dealListSvc(data)
 		{
 			alertFlag = "";
 		}
-
 		var svc =  "<li><a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick=\"showSvcPage('{0}')\"><span class='glyphicon {1}' style='color:{2}'></span>{3} {4}</a></li>"
 		.format(curRecord.svc_name,icon, color, curRecord.svc_name, alertFlag);
 		svrLst += svc;
@@ -158,16 +119,7 @@ function dealListSvc(data)
  	}
 
 	svrLst +="</ul>"
-	$('#sidebar').html(svrLst);
-	g_freshStateFlag = true;
-}
-
-function freshSvcState() {
-	if (Boolean(g_freshStateFlag))
-	{
-		getMonitorData(g_getStateUrl,"ListSvc", '1.0', "NULL", dealListSvc);
-		g_freshStateFlag = false;
-	}
+	return svrLst;
 }
 
 function startService() {
@@ -206,9 +158,13 @@ function addService() {
 	$("#addServiceForm").submit(function () {
 		$.ajax({
 		type: "POST",
+		async:false,
 		action: "/action/uploadFile",
 		enctype:"multipart/form-data",
 		data: $(this).serialize(),
+			statusCode: {505: function() {
+    alert('page not found');
+  }},
 		  success: function(response, xml) {
 			 getMonitorData(g_actionMonitorUrl, "AddSvc", '1.0', para, "NULL");
 		   }
@@ -254,23 +210,22 @@ function loadRemoveServiceList() {
 }
 
 function updateBin() {
-	var para = {};
-	var package = $('#updatePackage').fileinput('getFileStack');
-    if (package.length == 0)
-        $('#addService').popover('请选择服务配置文件！')
-    para.package_name = package[0].name;
-		$("#updateBinForm").submit(function () {
-		$.ajax({
-		type: "POST",
-		action: "/action/uploadFile",
-		enctype:"multipart/form-data",
-		data: $(this).serialize(),
-		success: function(response, xml) {
-			  console.log("upload file finish!");
-			 getMonitorData(g_actionMonitorUrl, "UpdateCmd", '1.0', para, "NULL");
-		   }
-		})
-	});
+	// var para = {};
+	// var package = $('#updatePackage').fileinput('getFileStack');
+    // if (package.length == 0)
+     //    $('#addService').popover('请选择服务配置文件！')
+    // para.package_name = package[0].name;
+	// 	$("#updateBinForm").submit(function () {
+	// 	$.ajax({
+	// 	type: "POST",
+	// 	action: "/action/uploadFile",
+	// 	enctype:"multipart/form-data",
+	// 	data: $(this).serialize(),
+	// 	success: function(response, xml) {
+	// 		  console.log("upload file finish!");
+	// 		 getMonitorData(g_actionMonitorUrl, "UpdateCmd", '1.0', para, "NULL");
+	// 	   }
+	// 	})
+	// });
 	$("#updateBinForm").submit();
 }
-

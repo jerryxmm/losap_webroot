@@ -1,4 +1,18 @@
-/* Sidebar Navigation */
+
+*{ margin:0px; padding:0px; font-family:"微软雅黑"; box-sizing: border-box; font-size:14px;}
+a,em,input,button{ font:14px "微软雅黑";}
+body{ width:100%; height:100%; font-size:14px;}
+ul,li{ list-style:none;margin:0px; padding:0px;}
+a{ text-decoration:none;}
+.hide{ display:none;}
+img{ border:none;}
+.l{ float:left;}
+.r{ float:right;}
+.clear:after { content:''; display:table; clear:both; height:0;}
+.tl{ text-align:left;}
+.tc{ text-align:center;}
+.tr{ text-align:right;}
+
 #sidebar {
 	display: block;
 }
@@ -31,4 +45,59 @@
 }
 #sidebar > ul li ul li:last-child a {
 	border-bottom: 0;
+}
+/*系统首页*/
+.fs12{ font-size:12px;}
+.fs20{ font-size:20px;}
+.jkjd_main{ padding:30px 0px 30px 0px;}
+
+.jkjd_fwname a{ width:100%; line-height:34px; cursor:pointer; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow: ellipsis;}
+.red{ color:#ff2400;}
+
+.perform{
+	 width:21%; float:left; margin-right:2%; margin-left:2%; background-color:#52b6e3; height:90px;
+}
+.perform img{
+	float:left; margin:24px 0px 0px 20px;
+}
+.jkjd_sj_item{ margin-left:90px; margin-right:10px;}
+.jkjd_sj_item span{ width:50%; display:inline-block; vertical-align:top; color:#FFF; margin-top:22px;}
+.jkjd_fw_title{ margin-left:1%; margin-right:1%; border:1px solid #ddd; border-radius:2px; background-color:#f8f8f8; color:#555; font-size:16px; padding-left:15px;}
+#homePage{
+	height: 600px;
+}
+.jkjd_fw{ width:16%; height:110px; margin-right:2%;margin-left:2%; background-color:#fbfbfb; border:1px solid #ddd; border-radius:2px; box-shadow:0px 0px 2px #ddd; float:left; margin-top:20px;padding: 0px}
+.jkjd_name{ border-bottom:1px solid #ddd; font-size:14px;}
+.jkjd_name span img{ margin:12px 12px 0px 0px;}
+.jkjd_fwname{ margin-right:30px; padding-left:15px;}
+.jkjd_fwname a:hover{ color:#52b6e3;}
+.jkjd_yj{ margin-top:20px; font-size:14px; color:#666;}
+.jkjd_yj font{ font-size:18px; margin:0px 5px; display:inline-block; vertical-align:text-bottom;}
+#addServiceTab{
+	min-height: 240px;
+	padding: 10px 20px;
+}
+.uploadLable{
+	line-height: 30px;
+}
+#addServiceForm {
+	margin-top: 10px;
+	width: 500px;
+}
+
+#addService{
+	margin-top: 10px;
+}
+
+#updateBinTab{
+	min-height: 240px;
+	padding: 10px 20px;
+}
+#updateBinForm {
+	margin-top: 10px;
+	width: 500px;
+}
+
+#updateBtn{
+	margin-top: 10px;
 }

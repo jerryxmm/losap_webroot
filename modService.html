@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Apex 监控</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/bootstrap.min.css" />
+<link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+<!--bootstrap file input-->
+<link rel="stylesheet" href="css/fileinput.css" />
+<link rel="stylesheet" href="css/bootstrap-table.css">
+<link rel="stylesheet" href="css/monitor.css">
+</head>
+<body style="background-color: #E6E6E6">
+
+<nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px; ">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <img src="images/jklogo.png" class="img-responsive" style="margin: 8px 0px 0px 0px;display: inline-block;vertical-align: top;">
+            <span style="font-size: 22px;display: inline-block;vertical-align: top;margin: 13px 0px 0px 8px;">服务节点监控系统</span>
+        </div>
+        <ul id = "myTab" class="nav navbar-nav nav-tabs navbar-right">
+            <li><a id= "ttt" href="index.html"><span class="glyphicon glyphicon-home"></span>  主页</a></li>
+            <li><a href="index.html?tab=monitorPage"><span class="glyphicon glyphicon-eye-open"></span>  监控服务</a></li>
+            <li class="dropdown">
+                <a href="#" id = "maiatance" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span>   维护<b class="caret"> </b></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="maiatance">
+                    <li><a href="index.html?tab=addServiceTab"><span class="glyphicon glyphicon-plus"></span> 增加服务</a></li>
+                    <li><a id ="removeSvc" href="index.html?tab=removeServiceTab" onclick="loadRemoveServiceList()"><span class="glyphicon glyphicon-minus"></span> 删除服务</a></li>
+                    <li class="active"><a href="modService.html"><span class="glyphicon glyphicon-pencil"></span> 修改服务</a></li>
+                    <li><a href="index.html?tab=updateBinTab"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
+                </ul>
+            </li>
+            <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
+            <li class="disabled"><a id = "loginUserName" href="#" >  用户</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid" style="padding: 0px">
+   <div class=" tab-content" style="margin-top: 60px;margin-bottom: 10px;background-color: #FFFFFF;overflow: hidden; ">
+        <div class="row">
+            <div id="sidebar" class="col-lg-2 col-md-2">
+            </div>
+          <div id="content" class="col-lg-10 col-md-10" style="padding: 0px">
+              <div class="row">
+                    <h4 class="l">SVC配置服务</h4>
+                    <button type='button' class='btn btn-default r' onclick="saveXml()">保存配置文件</button>
+              </div>
+              <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="80%" color=#987cb9 SIZE=10>
+              <input type="text" value="100" name="ttttt"><span class="label label-default">Default</span>
+          </div>
+        </div>
+    </div>
+<div class="row" style="margin-left: 0px;margin-right: 0px">
+   <div class="panel panel-default">
+       <div class="panel-heading" style="padding: 0px; background: white">
+           <h5>&nbsp;&nbsp;&nbsp;系统实时日志</h5>
+       </div>
+       <div class="panel-body " style="padding:0px 0px 15px 15px" >
+        <dl class="dl-horizontal">
+          <dt style="background-color: #FAFAFA; width: 30px; height: 300px">
+              <ul class="list-unstyled center-block" style="">
+                <li><span class="glyphicon glyphicon-info-sign" style="color: cornflowerblue; margin: 5px 8px 5px 8px"></span></li>
+                <li><span class="glyphicon glyphicon-info-sign" style="color: sandybrown; margin: 5px 8px 5px 8px"></span></li>
+                <li><span class="glyphicon glyphicon-remove-circle" style="color: red; margin: 5px 8px 5px 8px"></span></li>
+              </ul>
+          </dt>
+            <div style="background-color: white; overflow: scroll;height: 300px">
+                <ul id = "logArea" class="list-group">
+                </ul>
+            </div>
+        </dl>
+
+       </div>
+    </div>
+</div>
+</div>
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/common.js"></script>
+<script src ="js/monitor.js"></script>
+<script src="modService.js"></script>
+</body>
+</html>
