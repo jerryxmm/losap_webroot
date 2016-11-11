@@ -1,8 +1,8 @@
 $(function(){
 	setLoginUser();
 	freshSvcState();
-	// setInterval("freshSvcState()",g_updateLag);
-	// setInterval("GetLog()",g_updateLag);
+	 setInterval("freshSvcState()",g_updateLag);
+	 setInterval("GetLog()",g_updateLag);
 });
 
 function freshSvcState() {

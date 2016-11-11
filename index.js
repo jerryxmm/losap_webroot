@@ -2,8 +2,10 @@
 $(function(){
 	setLoginUser();
 	freshSvcState();
+	GetServerInfo();
+	setInterval("GetServerInfo()",g_updateLag);
 	setInterval("freshSvcState()",g_updateLag);
-	setInterval("GetLog()",g_updateLag);
+	//setInterval("GetLog()",g_updateLag);
 	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	//   e.target // newly activated tab
 	//   e.relatedTarget // previous active tab
@@ -14,6 +16,13 @@ $(function(){
 	{
 		$('#myTab a[href="#{0}"]'.format(tab)).tab('show');
 	}
+
+	document.querySelector('ul[id=monitorObject]').onclick = function (e) {
+                $('#monitorObject > li').removeClass('active');
+                var target = e.target;
+				var liObj = target.parentElement;
+				liObj.setAttribute("class", "active");
+            }
 });
 
 function initHomePage() {
@@ -32,7 +41,8 @@ function createSvcViewItem(svcName, value) {
 	{
 		image = "images/jdzt_red_pic.png";
 	}
-	var node = "<div class=\"col-lg-2 jkjd_fw\"><div class=\"jkjd_name\"><span class=\"r tc\"><img src=\"{0}\" /></span><div class=\"jkjd_fwname\"><a href='#'>{1}</a></div></div><div class=\"jkjd_yj tc\">当前<font>0</font>条预警</div></div>".format(image,svcName);
+	var node = "<div class=\"col-lg-2 jkjd_fw\"><div class=\"jkjd_name\"><span class=\"r tc\"><img src=\"{0}\" /></span><div class=\"jkjd_fwname\"><a href='#monitorPage'  data-toggle='tab' onclick=\"showSvcPage('{2}')\">{1}</a></div></div><div class=\"jkjd_yj tc\">全部笔数<font>0</font></div><div class=\"jkjd_yj tc\">未处理数<font>0</font></div><div class=\"jkjd_yj tc\">处理速度<font>0</font></div></div>"
+		.format(image,svcName,svcName);
 	$("#svcView").append(node);
 }
 
@@ -92,8 +102,13 @@ function dealListSvc(data)
 		{
 			alertFlag = "";
 		}
-		var svc =  "<li><a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick=\"showSvcPage('{0}')\"><span class='glyphicon {1}' style='color:{2}'></span>{3} {4}</a></li>"
-		.format(curRecord.svc_name,icon, color, curRecord.svc_name, alertFlag);
+		var isActive="";
+		if (g_curSvc == curRecord.svc_name)
+		{
+			isActive = "active";
+		}
+		var svc =  "<li class='{5}'><a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick=\"showSvcPage('{0}')\"><span class='glyphicon {1}' style='color:{2}'></span>{3} {4}</a></li>"
+		.format(curRecord.svc_name,icon, color, curRecord.svc_name, alertFlag, isActive);
 		svrLst += svc;
 		var svcObj = curRecord;
 		g_svcStatus.set(curRecord.svc_name, svcObj);
@@ -185,4 +200,18 @@ function loadRemoveServiceList() {
 
 function updateBin() {
 	$("#updateBinForm").submit();
+}
+
+function GetServerInfo() {
+	getMonitorData(g_getStateUrl,"GetServerInfo", '1.0', "NULL", dealServerInfo);
+}
+
+function dealServerInfo(data) {
+	var obj = JSON.parse(data);
+	document.getElementById ("cpu").innerHTML = obj.CPU + "%";
+	document.getElementById("memery").innerHTML = obj.MEM + "%";
+	var diskUsed = obj.DiskTotal - obj.DiskFree;
+	var percent = diskUsed/obj.DiskTotal *100;
+	document.getElementById("diskUsed").innerHTML = percent.toFixed(2) + "%";
+	document.getElementById("diskInfo").innerHTML  = diskUsed.toString() + "G/" + obj.DiskTotal.toString() + "G";
 }

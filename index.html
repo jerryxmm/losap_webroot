@@ -20,8 +20,7 @@
             <span style="font-size: 22px;display: inline-block;vertical-align: top;margin: 13px 0px 0px 8px;">服务节点监控系统</span>
         </div>
         <ul id = "myTab" class="nav navbar-nav nav-tabs navbar-right">
-            <li class="active"><a id= "ttt" href="#homePage" data-toggle="tab"><span class="glyphicon glyphicon-home"></span>  主页</a></li>
-            <li><a href="#monitorPage" data-toggle="tab"><span class="glyphicon glyphicon-eye-open"></span>  监控服务</a></li>
+            <li class="active"><a href="#homePage" data-toggle="tab"><span class="glyphicon glyphicon-eye-open"></span>  监控服务</a></li>
             <li class="dropdown">
                 <a href="#" id = "maiatance" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span>   维护<b class="caret"> </b></a>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="maiatance">
@@ -42,17 +41,15 @@
             <div class="row jkjd_main">
                 <div class="col-lg-3 perform">
                     <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">CPU</span><span class="fs20 tr">30 %</span></div>
+                    <div class="jkjd_sj_item"><span class="fs20 tl">CPU</span><span id="cpu" class="fs20 tr">30 %</span></div>
                 </div>
                 <div class="col-lg-3 perform" >
                     <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">内存</span><span class="fs20 tr">30 %<br />
-                  <font class="fs12">1243 MB</font></span></div>
+                    <div class="jkjd_sj_item"><span class="fs20 tl">内存</span><span id="memery" class="fs20 tr">30 %</span><span class="fs12">1243 MB</span></div>
                 </div>
                 <div class="col-lg-3 perform">
                     <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">磁盘</span><span class="fs20 tr">30 %<br />
-                  <font class="fs12">13 MB/秒</font></span></div>
+                    <div class="jkjd_sj_item"><span class="fs20 tl">磁盘</span><span id="diskUsed" class="fs20 tr">30 %</span><span id="diskInfo" class="fs12">13 MB/秒</span></div>
                 </div>
                 <div class="col-lg-3 perform">
                     <img src="images/jdtj_pic.png" />
@@ -87,6 +84,7 @@
                   </div>
                   <div class="panel-heading" style="background: #E4ECF7; padding: 5px 10px 5px 10px">
                       <div class="form-inline">
+                           <a href="#homePage" data-toggle="tab"><span class="glyphicon glyphicon-home"  data-toggle="tooltip"  title="主页" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" onclick="startService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px"></span></a>
                            <a href="#" onclick="stopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
@@ -96,7 +94,7 @@
                        </div>
                   </div>
                   <div class="panel-body">
-                       <ul id = "monitorObject" class="nav nav-tabs" role="tablist">
+                       <ul id = "monitorObject" class="nav nav-tabs">
                       </ul>
                     <div id="toolbar" class="btn-group">
                         <button type="button" class="btn btn-default">
@@ -190,6 +188,7 @@
    <div class="panel panel-default">
        <div class="panel-heading" style="padding: 0px; background: white">
            <h5>&nbsp;&nbsp;&nbsp;系统实时日志</h5>
+           <audio id="alarmAudio" src="images/alarm.mp3" controls="controls" loop="true" hidden="true"  ></audio>
        </div>
        <div class="panel-body " style="padding:0px 0px 15px 15px" >
         <dl class="dl-horizontal">

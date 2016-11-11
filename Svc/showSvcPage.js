@@ -1,11 +1,15 @@
 function showSvcPage(serviceId) {
-	funcName = "ListSvcItem";
-	//serviceId = getQueryString("serviceId");
-	var execFunc = funcName+'("'+serviceId + '")';
-	eval(execFunc);
+	var curObj = g_svcStatus.get(serviceId);
+	if (curObj.status_run == 1)
+	{
+		funcName = "ListSvcItem";
+		//serviceId = getQueryString("serviceId");
+		var execFunc = funcName+'("'+serviceId + '")';
+		eval(execFunc);
+	}
 	g_curSvc = serviceId;
-    $('#monitorObject').html("");
-	$("#grid").hide();
+    $('#monitorObject').empty();
+	$('#table').bootstrapTable('destroy');
 	initServicePage(serviceId);
 }
 
@@ -50,7 +54,7 @@ function ShowListSvcItem(str, serviceId)
 		  var rec = records[i];
 		  if ( rec.show == 1)
 		  {
-			  var monObj = "<li role=\"presentation\" ><a href=\"#\" onclick=\"ListSvcItemInfo('{0}','{1}')\">{2}</a></li>".format(serviceId, rec.id,rec.name);
+			  var monObj = "<li><a href=\"#\" onclick=\"ListSvcItemInfo('{0}','{1}')\">{2}</a></li>".format(serviceId, rec.id,rec.name);
          	 monObjs += monObj;
 		  }
       }
@@ -96,7 +100,6 @@ function ShowListSvcInfo(varData)
 		showToggle: true,
 		cardView: false,
 		showPaginationSwitch:true,
-		detailView: true,
 		showExport: false,
 		exportDataType: "basic",
 		search:true,

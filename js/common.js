@@ -104,12 +104,12 @@ function getMonitorData(url, monitorItem, version, param, dealDataFunc)
 {
     var req = new Request(version, monitorItem, param); 
     var postStr = JSON.stringify(req);
-    console.log(postStr);
+    //console.log(postStr);
     var xmlhttp = sendRequest(url, 'POST',  "application/x-www-form-urlencoded", postStr);
     xmlhttp.onreadystatechange=function()  
     {  
       if (xmlhttp.readyState==4 && (xmlhttp.status==200 || xmlhttp.status==302)){
-                console.log(xmlhttp.responseText);
+                //console.log(xmlhttp.responseText);
                 var response = xmlhttp.responseText;
                 if (typeof(dealDataFunc) == 'function')
                 {
