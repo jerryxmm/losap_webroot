@@ -10,7 +10,8 @@ function login(){
 		$('#error').html('用户名密码不为空');
 		return;
 	}
-	loadXMLDoc(username,password,'/login');
+	//loadXMLDoc(username,password,'/login');
+	loadXMLDoc(username,password,'/action/login');
 }
 
 function loadXMLDoc(username,password,url)  
@@ -24,7 +25,7 @@ function loadXMLDoc(username,password,url)
 	  {// code for IE6, IE5  
 	  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");  
 	  }
-	xmlhttp.open("POST",url,true);  
+	xmlhttp.open("POST",url,true);
 	xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded"); 
 	var postStr   = "username="+ username +"&password="+ password; 
 	xmlhttp.send(postStr);

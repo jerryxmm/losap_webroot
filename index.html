@@ -53,8 +53,7 @@
                 </div>
                 <div class="col-lg-3 perform">
                     <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">网络</span><span class="fs20 tr">30 %<br />
-                      <font class="fs12">1.13 Mdps</font></span></div>
+                    <div class="jkjd_sj_item"><span class="fs20 tl">网络</span><span id="netSpeed" class="fs20 tr">30 %<br /></span></div>
                 </div>
             </div>
             <div class="jkjd_fw_title">服务节点情况</div>
@@ -191,20 +190,17 @@
            <audio id="alarmAudio" src="images/alarm.mp3" controls="controls" loop="true" hidden="true"  ></audio>
        </div>
        <div class="panel-body " style="padding:0px 0px 15px 15px" >
-        <dl class="dl-horizontal">
-          <dt style="background-color: #FAFAFA; width: 30px; height: 300px">
-              <ul class="list-unstyled center-block" style="">
+          <div>
+              <ul class="list-unstyled center-block" style="float: left">
                 <li><span class="glyphicon glyphicon-info-sign" style="color: cornflowerblue; margin: 5px 8px 5px 8px"></span></li>
                 <li><span class="glyphicon glyphicon-info-sign" style="color: sandybrown; margin: 5px 8px 5px 8px"></span></li>
                 <li><span class="glyphicon glyphicon-remove-circle" style="color: red; margin: 5px 8px 5px 8px"></span></li>
               </ul>
-          </dt>
-            <div id = "logDiv" style="background-color: white; overflow: scroll;height: 300px">
+          <div>
+          <div id = "logDiv" style="background-color: white; overflow: scroll;height: 300px">
                 <ul id = "logArea" class="list-group">
                 </ul>
-            </div>
-        </dl>
-
+           </div>
        </div>
     </div>
 </div>
