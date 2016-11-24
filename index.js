@@ -2,10 +2,10 @@
 $(function(){
 	setLoginUser();
 	freshSvcState();
-	GetServerInfo();
-	setInterval("GetServerInfo()",g_updateLag);
-	setInterval("freshSvcState()",g_updateLag);
-	setInterval("GetLog()",g_updateLag);
+	 GetServerInfo();
+	 setInterval("GetServerInfo()",g_updateLag);
+	 setInterval("freshSvcState()",g_updateLag);
+	 setInterval("GetLog()",g_updateLag);
 	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	//   e.target // newly activated tab
 	//   e.relatedTarget // previous active tab
@@ -23,7 +23,76 @@ $(function(){
 				var liObj = target.parentElement;
 				liObj.setAttribute("class", "active");
             }
+
+    // $.getJSON("http://192.168.60.135:4101/Public/remote.js",function(data){
+    //      alert('我是本地函数，可以被跨域的remote.js文件调用，远程js带来的数据是：' + data.result);
+    // });
+	//alert('目前 jQuery 版本：' + $().jquery);
+	//remoteTest();
+	//cors();
+	//setInterval("remoteTest()",g_updateLag);
 });
+
+function cors(){
+	var url = "http://192.168.60.135:4101/action/actionMonitor";
+	var xhr = createCORSRequest('POST', url);  
+	if (!xhr) {  
+	  throw new Error('CORS not supported');  
+	} 
+	xhr.onreadystatechange=function()  
+    {  
+      if (xhr.readyState==4 && (xhr.status==200 || xhr.status==302)){
+            console.log(xhr.responseText);
+               // var response = xmlhttp.responseText; 
+        }
+    }
+	
+	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+	var para = {version:"1.0", func:"ListSvc", param:"NULL"};
+	var req = JSON.stringify(para);
+    xhr.send(req); 
+}
+function createCORSRequest(method, url) {  
+  var xhr = new XMLHttpRequest();  
+  if ("withCredentials" in xhr) {  
+    // 此时即支持CORS的情况  
+    // 检查XMLHttpRequest对象是否有“withCredentials”属性  
+    // “withCredentials”仅存在于XMLHTTPRequest2对象里  
+    xhr.open(method, url, true);  
+   
+  }else {  
+   
+    // 否则，浏览器不支持CORS  
+    xhr = null;  
+   
+  }  
+  return xhr;  
+}
+function remoteTest() {
+	// $.getJSON("http://192.168.60.135:4101/Public/remote.js", { name: "John", time: "2pm" }, function(json){
+	//   console.log('code = ' + code +'您查询到航班信息：票价： ' + json.price + ' 元，余票： ' + json.tickets + ' 张。');
+	// });
+	var para = {version:"1.0", func:"ListSvc", param:"NULL"};
+	var uu = "http://192.168.60.135:4101/action/jsonp?data={0}".format(JSON.stringify(para));
+	var urlStr = encodeURI(uu);
+	console.log(uu);
+	$.ajax({
+		 type: "get",
+		 async: false,
+		 url: urlStr,
+		 dataType: "jsonp",
+		 jsonp: "callback",//传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(一般默认为:callback)
+		 jsonpCallback:"doHandler",//自定义的jsonp回调函数名称，默认为jQuery自动生成的随机函数名，也可以写"?"，jQuery会自动为你处理数据
+		 success: function(json){
+			 console.log(json);
+			// var code = getQueryString("code");
+			// console.log('code = ' + code +'您查询到航班信息：票价： ' + json.price + ' 元，余票： ' + json.tickets + ' 张。');
+		 },
+		 error: function(){
+			 alert('fail');
+		 }
+	 });
+}
 
 function initHomePage() {
 	$("#svcView").empty();
@@ -227,28 +296,13 @@ function GetServerInfo() {
 function dealServerInfo(data) {
 	var obj = JSON.parse(data);
 	document.getElementById ("cpu").innerHTML = obj.CPU + "%";
-	document.getElementById("memery").innerHTML = obj.MEM + "%";
+	document.getElementById("memery").innerHTML = obj.MemUsedPercent + "%";
+	var memUsed = (obj.MemTotal - obj.MemFree)/1024;
+	var memTotal = obj.MemTotal/1024;
+	document.getElementById("memInfo").innerHTML  = memUsed.toFixed(0) + "M/" + memTotal.toFixed(0)+ "M";
 	var diskUsed = obj.DiskTotal - obj.DiskFree;
 	var percent = diskUsed/obj.DiskTotal *100;
 	document.getElementById("diskUsed").innerHTML = percent.toFixed(2) + "%";
 	document.getElementById("diskInfo").innerHTML  = diskUsed.toString() + "G/" + obj.DiskTotal.toString() + "G";
-	document.getElementById("netSpeed").innerHTML  = "Down:" + obj.InSpeed.toString()+ "MB/s "+ "UP:"+ obj.OutSpeed.toString() + "MB/s";
-}
-
-function testBase64() {
-
-	var content = "this is test data! please check!";
-	// content += "second line!";
-	var dst = base64encode(content);
-	console.log(dst);
-	var para = {service_id:"A5_FC_FOS_xhm", TestData:dst};
-	getMonitorData(g_getStateUrl,"GetSvcXml", '1.0', para, dealTestBase64);
-}
-
-function dealTestBase64(data) {
-	var obj = JSON.parse(data);
-	var dstA = base64decode(obj.contentA);
-	console.log("DSTA:" + dstA);
-	var dstB = base64decode(obj.contentB);
-	console.log("DSTB:" + dstB);
+	document.getElementById("netSpeed").innerHTML  = "UP:" + obj.UpSpeed.toFixed(3)+ "MB/s "+ "Down:"+ obj.DownSpeed.toFixed(3) + "MB/s";
 }

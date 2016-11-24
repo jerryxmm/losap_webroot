@@ -9,6 +9,7 @@
 <!--bootstrap file input-->
 <link rel="stylesheet" href="css/fileinput.css" />
 <link rel="stylesheet" href="css/bootstrap-table.css">
+<link rel="stylesheet" href="css/bootstrap-treeview.css">
 <link rel="stylesheet" href="css/monitor.css">
 </head>
 <body style="background-color: #E6E6E6">
@@ -28,6 +29,7 @@
                     <li><a id ="removeSvc" href="#removeServiceTab" data-toggle="tab" onclick="loadRemoveServiceList()"><span class="glyphicon glyphicon-minus"></span> 删除服务</a></li>
                     <li><a href="modService.html"><span class="glyphicon glyphicon-pencil"></span> 修改服务</a></li>
                     <li><a href="#updateBinTab" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
+                    <li><a href="#addMonitorNode" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 新增监控节点</a></li>
                 </ul>
             </li>
             <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
@@ -45,7 +47,7 @@
                 </div>
                 <div class="col-lg-3 perform" >
                     <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">内存</span><span id="memery" class="fs20 tr">30 %</span><span class="fs12">1243 MB</span></div>
+                    <div class="jkjd_sj_item"><span class="fs20 tl">内存</span><span id="memery" class="fs20 tr">30 %</span><span id="memInfo" class="fs12">1243 MB</span></div>
                 </div>
                 <div class="col-lg-3 perform">
                     <img src="images/jdtj_pic.png" />
@@ -87,26 +89,49 @@
                            <a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" onclick="startService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px"></span></a>
                            <a href="#" onclick="stopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
+                           <a id="debugTab" href="#debugTab" onclick="startDebug()" data-toggle="tab"><span id = "onlineDebug" class="glyphicon glyphicon-plane" data-toggle="tooltip"  title="在线调试" style="color:#BEBFC0; margin-left: 10px"></span></a>
                           <a href="#" class="pull-right input-group-addon" onclick="execCmd()" style="margin-top: -5px;"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
                           <input id="sqlText" type="text" class="pull-right" style="margin-top: -3px; width: 300px">
 
                        </div>
                   </div>
-                  <div class="panel-body">
-                       <ul id = "monitorObject" class="nav nav-tabs">
-                      </ul>
-                    <div id="toolbar" class="btn-group">
-                        <button type="button" class="btn btn-default">
-                            <i class="glyphicon glyphicon-plus"></i>
-                        </button>
-                        <button type="button" class="btn btn-default">
-                            <i class="glyphicon glyphicon-heart"></i>
-                        </button>
-                        <button type="button" class="btn btn-default">
-                            <i class="glyphicon glyphicon-trash"></i>
-                        </button>
-                    </div>
-                    <table id="table" data-toolbar="#toolbar"></table>
+                  <div class="panel-body tab-content">
+                      <div id="svcPage" class="tab-pane fade in active">
+                          <ul id = "monitorObject" class="nav nav-tabs">
+                          </ul>
+                          <div id="toolbar" class="btn-group">
+                            <button type="button" class="btn btn-default">
+                                <i class="glyphicon glyphicon-plus"></i>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <i class="glyphicon glyphicon-heart"></i>
+                            </button>
+                            <button type="button" class="btn btn-default">
+                                <i class="glyphicon glyphicon-trash"></i>
+                            </button>
+                           </div>
+                           <table id="table" data-toolbar="#toolbar"></table>
+                      </div>
+                      <div id="debugPage" class="tab-pane fade">
+                          <ul id = "debugArea" class="list-group">
+                            </ul>
+                          <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-lg"">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    <h4 class="modal-title" id="debugModalLabel">Modal title</h4>
+                                  </div>
+                                  <div id="debugModalBody" class="modal-body">
+                                    ...
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                      </div>
                   </div>
               </div>
           </div>
@@ -182,6 +207,9 @@
             </form>
           <button id = "updateBtn" type="button" class="btn btn-default" onclick="updateBin()">升级</button>
         </div>
+        <div id = "addMonitorNode" class="tab-pane fade">
+
+        </div>
     </div>
 <div class="row" style="margin-left: 0px;margin-right: 0px">
    <div class="panel panel-default">
@@ -209,6 +237,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/bootstrap-table.js"></script>
 <script src="js/bootstrap-table-zh-CN.js"></script>
+<script src="js/bootstrap-treeview.js"></script>
 <script src="js/fileinput.js"></script>
 <script src="js/base64.js"></script>
 <script src="js/common.js"></script>

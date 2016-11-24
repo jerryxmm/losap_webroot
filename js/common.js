@@ -109,7 +109,7 @@ function getMonitorData(url, monitorItem, version, param, dealDataFunc)
     xmlhttp.onreadystatechange=function()  
     {  
       if (xmlhttp.readyState==4 && (xmlhttp.status==200 || xmlhttp.status==302)){
-                console.log(xmlhttp.responseText);
+               // console.log(xmlhttp.responseText);
                 var response = xmlhttp.responseText;
                 if (typeof(dealDataFunc) == 'function')
                 {
