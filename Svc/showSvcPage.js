@@ -120,7 +120,6 @@ function ListSvcItem(serviceId)
 	getMonitorData(g_getStateUrl, "ListSvcItem", '1.0', para, ShowListSvcItem);
 }
 
-
 function ListSvcLog(serviceId)
 {
 	var para = {service_id:serviceId};

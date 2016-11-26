@@ -2,10 +2,11 @@
 $(function(){
 	setLoginUser();
 	freshSvcState();
-	 GetServerInfo();
-	 setInterval("GetServerInfo()",g_updateLag);
-	 setInterval("freshSvcState()",g_updateLag);
-	 setInterval("GetLog()",g_updateLag);
+	//  GetServerInfo();
+	//  setInterval("GetServerInfo()",g_updateLag);
+	//  setInterval("freshSvcState()",g_updateLag);
+	//  setInterval("GetLog()",g_updateLag);
+
 	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	//   e.target // newly activated tab
 	//   e.relatedTarget // previous active tab
@@ -22,117 +23,27 @@ $(function(){
                 var target = e.target;
 				var liObj = target.parentElement;
 				liObj.setAttribute("class", "active");
-            }
-
-    // $.getJSON("http://192.168.60.135:4101/Public/remote.js",function(data){
-    //      alert('我是本地函数，可以被跨域的remote.js文件调用，远程js带来的数据是：' + data.result);
-    // });
-	//alert('目前 jQuery 版本：' + $().jquery);
-	//remoteTest();
-	//cors();
-	//setInterval("remoteTest()",g_updateLag);
+            };
 });
 
-function cors(){
-	var url = "http://192.168.60.135:4101/action/actionMonitor";
-	var xhr = createCORSRequest('POST', url);  
-	if (!xhr) {  
-	  throw new Error('CORS not supported');  
-	} 
-	xhr.onreadystatechange=function()  
-    {  
-      if (xhr.readyState==4 && (xhr.status==200 || xhr.status==302)){
-            console.log(xhr.responseText);
-               // var response = xmlhttp.responseText; 
-        }
-    }
+function StartMonitor() {
 	
-	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-	var para = {version:"1.0", func:"ListSvc", param:"NULL"};
-	var req = JSON.stringify(para);
-    xhr.send(req); 
-}
-function createCORSRequest(method, url) {  
-  var xhr = new XMLHttpRequest();  
-  if ("withCredentials" in xhr) {  
-    // 此时即支持CORS的情况  
-    // 检查XMLHttpRequest对象是否有“withCredentials”属性  
-    // “withCredentials”仅存在于XMLHTTPRequest2对象里  
-    xhr.open(method, url, true);  
-   
-  }else {  
-   
-    // 否则，浏览器不支持CORS  
-    xhr = null;  
-   
-  }  
-  return xhr;  
-}
-function remoteTest() {
-	// $.getJSON("http://192.168.60.135:4101/Public/remote.js", { name: "John", time: "2pm" }, function(json){
-	//   console.log('code = ' + code +'您查询到航班信息：票价： ' + json.price + ' 元，余票： ' + json.tickets + ' 张。');
-	// });
-	var para = {version:"1.0", func:"ListSvc", param:"NULL"};
-	var uu = "http://192.168.60.135:4101/action/jsonp?data={0}".format(JSON.stringify(para));
-	var urlStr = encodeURI(uu);
-	console.log(uu);
-	$.ajax({
-		 type: "get",
-		 async: false,
-		 url: urlStr,
-		 dataType: "jsonp",
-		 jsonp: "callback",//传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(一般默认为:callback)
-		 jsonpCallback:"doHandler",//自定义的jsonp回调函数名称，默认为jQuery自动生成的随机函数名，也可以写"?"，jQuery会自动为你处理数据
-		 success: function(json){
-			 console.log(json);
-			// var code = getQueryString("code");
-			// console.log('code = ' + code +'您查询到航班信息：票价： ' + json.price + ' 元，余票： ' + json.tickets + ' 张。');
-		 },
-		 error: function(){
-			 alert('fail');
-		 }
-	 });
 }
 
 function initHomePage() {
 	$("#svcView").empty();
+	var svcLst = [];
 	for (var [key, value] of g_svcStatus) {
-	  createSvcViewItem(key, value);
+		svcLst.push(value);
 	}
+	var localServer = {desc:"本机", svcLst:svcLst};
+	var serverLst = [localServer];
+	$('#svcView').testPlugin(
+		{
+			data:serverLst
+		}
+	);
 }
-function createSvcViewItem(svcName, value) {
-	var image = "";
-	var userColor ="";
-	var clientNum = ""
-	if (value.status_run == 1)
-	{
-		image = "images/jdzt_green_pic.png";
-		userColor = "green";
-		clientNum = value.online_client;
-	}
-	else
-	{
-		image = "images/jdzt_red_pic.png";
-		userColor = "red";
-	}
-	var node = "<div class='col-lg-2 jkjd_fw'>"+
-					"<div class='jkjd_name'><span class='r tc'><img src=\"{0}\" /></span>".format(image) +
-                        "<div class='jkjd_fwname'><a href='#monitorPage'  data-toggle='tab' onclick=\"showSvcPage('{0}')\">{1}</a></div>".format(svcName,svcName) +
-                    "</div>" +
-                    "<div class='row'>" +
-                            "<div class='col-lg-3'><span class='glyphicon glyphicon-user' style=\"color: {0};margin-left: 5px\">{1}</span></div>".format(userColor, clientNum) +
-                        "<div class=\"col-lg-6 col-lg-offset-2\">" +
-                            "<p class='info'>全部笔数<span class='fs20'>{0}</span></p>".format(value.all_proc)+
-                            "<p class='info'>全部笔数<span class='fs20'>{0}</span></p>".format(value.unproc) +
-                            "<p class='info'>全部笔数<span class='fs20'>{0}</span></p>".format(value.proc_speed)+
-                        "</div>"+
-                    "</div>"+
-                "</div>";
-	// var node = "<div class=\"col-lg-2 jkjd_fw\"><div class=\"jkjd_name\"><span class=\"r tc\"><img src=\"{0}\" /></span><div class=\"jkjd_fwname\"><a href='#monitorPage'  data-toggle='tab' onclick=\"showSvcPage('{2}')\">{1}</a></div></div><div class=\"jkjd_yj tc\">全部笔数<span class='fs20'>{3}</span></div><div class=\"jkjd_yj tc\">未处理数<span class='fs20'>{4}</span></div><div class=\"jkjd_yj tc\">处理速度<sapn  class='fs20'>{5}</sapn></div></div>"
-	// 	.format(image,svcName,svcName, value.all_proc, value.unproc, value.proc_speed);
-	$("#svcView").append(node);
-}
-
 
 function SVCInfo(status, status_run, status_alert, version, uptime)
 {
@@ -143,13 +54,7 @@ function SVCInfo(status, status_run, status_alert, version, uptime)
 	this.uptime = uptime;
 }
 
-function freshSvcState() {
-	if (Boolean(g_freshStateFlag))
-	{
-		getMonitorData(g_getStateUrl,"ListSvc", '1.0', "NULL", dealHomeListSvc);
-		g_freshStateFlag = false;
-	}
-}
+
 
 function dealHomeListSvc(data) {
 	var svrLst = dealListSvc(data);
@@ -289,9 +194,6 @@ function updateBin() {
 	$("#updateBinForm").submit();
 }
 
-function GetServerInfo() {
-	getMonitorData(g_getStateUrl,"GetServerInfo", '1.0', "NULL", dealServerInfo);
-}
 
 function dealServerInfo(data) {
 	var obj = JSON.parse(data);
@@ -305,4 +207,33 @@ function dealServerInfo(data) {
 	document.getElementById("diskUsed").innerHTML = percent.toFixed(2) + "%";
 	document.getElementById("diskInfo").innerHTML  = diskUsed.toString() + "G/" + obj.DiskTotal.toString() + "G";
 	document.getElementById("netSpeed").innerHTML  = "UP:" + obj.UpSpeed.toFixed(3)+ "MB/s "+ "Down:"+ obj.DownSpeed.toFixed(3) + "MB/s";
+}
+
+var g_foreignSeverLst = [];
+function dealGetForeignServer(data) {
+	g_foreignSeverLst = JSON.parse(data);
+}
+
+function getForeignServer() {
+	var para = {fileName:"foreignServer.json"};
+	getMonitorData(g_getStateUrl,"GetForeignServer", '1.0', para, dealGetForeignServer);
+}
+
+function saveForeignServer() {
+	var para = {fileName:"foreignServer.json", serverLst:g_foreignSeverLst};
+	getMonitorData(g_getStateUrl,"GetForeignServer", '1.0', para, "NULL");
+}
+
+function dealForeignLogin(data) {
+	var obj = JSON.parse(data);
+}
+
+function loginForeignServer() {
+	var ip = $('#serverIP').val();
+	var port = $('#serverPort').val();
+	var userName = $('#serverUser').val();
+	var pass = $('#serverPassword').val();
+	var url = "http://{0}:{1}{2}".format(ip, port, g_foreignerUrl);
+	var para = {userName:userName, password:pass};
+	getForeignMonitorData(url, "ForeignLogin", para, dealForeignLogin);
 }

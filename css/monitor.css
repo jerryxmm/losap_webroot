@@ -30,7 +30,7 @@ img{ border:none;}
 .fs20{ font-size:20px;}
 .jkjd_main{ padding:30px 0px 30px 0px;}
 
-.jkjd_fwname a{ width:100%; line-height:34px; cursor:pointer; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow: ellipsis;}
+.jkjd_fwname a{ width:100%; line-height:34px; cursor:pointer; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow: ellipsis;background-color: #90C083;}
 .red{ color:#ff2400;}
 
 .perform{
@@ -50,12 +50,12 @@ img{ border:none;}
 	padding-bottom: 30px;
 }
 
-.jkjd_fw{ width:16%; height:130px; margin-right:2%;margin-left:2%; background-color:#fbfbfb; border:1px solid #ddd; border-radius:2px; box-shadow:0px 0px 2px #ddd; float:left;margin-bottom:20px;padding: 0px}
-.jkjd_name{ border-bottom:1px solid #ddd; font-size:14px;}
-.jkjd_name span img{ margin:12px 12px 0px 0px;}
+.jkjd_fw{width: 90%; height:130px; background-color:#fbfbfb; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.jkjd_fw a{margin-left:12px; border-bottom:1px solid #ddd; font-size:14px;}
+.jkjd_fw span img{ margin:12px 12px 0px 0px;}
 .jkjd_fwname{ margin-right:30px; padding-left:15px;}
 .jkjd_fwname a:hover{ color:#52b6e3;}
-.jkjd_yj{ margin-top:3px; font-size:14px; color:#666;}
+.jkjd_yj{ margin-top:10px; border-top:1px solid #ddd; font-size:14px; color:#666;}
 .jkjd_yj font{ font-size:18px; margin:0px 5px; display:inline-block; vertical-align:text-bottom;}
 #addServiceTab{
 	min-height: 240px;
@@ -84,6 +84,11 @@ img{ border:none;}
 
 #updateBtn{
 	margin-top: 10px;
+}
+
+#addServerNode{
+	min-height: 240px;
+	padding: 10px 20px;
 }
 
 .removeSvc{

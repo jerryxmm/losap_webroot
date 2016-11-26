@@ -29,7 +29,7 @@
                     <li><a id ="removeSvc" href="#removeServiceTab" data-toggle="tab" onclick="loadRemoveServiceList()"><span class="glyphicon glyphicon-minus"></span> 删除服务</a></li>
                     <li><a href="modService.html"><span class="glyphicon glyphicon-pencil"></span> 修改服务</a></li>
                     <li><a href="#updateBinTab" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
-                    <li><a href="#addMonitorNode" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 新增监控节点</a></li>
+                    <li><a href="#addServerNode" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 新增监控节点</a></li>
                 </ul>
             </li>
             <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
@@ -58,14 +58,14 @@
                     <div class="jkjd_sj_item"><span class="fs20 tl">网络</span><span id="netSpeed" class="fs20 tr">30 %<br /></span></div>
                 </div>
             </div>
-            <div class="jkjd_fw_title">服务节点情况</div>
-            <div id = "svcView" class="row">
-                <div class="col-lg-2 jkjd_fw">
-                    <div class="jkjd_name"><span class="r tc"><img src="images/jdzt_green_pic.png" /></span>
-                      <div class="jkjd_fwname"><a href="#">ubuntuubuntuubuntuubuntu</a></div>
-                    </div>
-                    <div class="jkjd_yj tc">当前<font>0</font>条预警</div>
-                </div>
+            <div id = "svcView">
+                <!--<div class="jkjd_fw_title">服务节点情况</div>-->
+                <!--<div class="col-lg-2 jkjd_fw">-->
+                    <!--<div class="jkjd_name"><span class="r tc"><img src="images/jdzt_green_pic.png" /></span>-->
+                      <!--<div class="jkjd_fwname"><a href="#">ubuntuubuntuubuntuubuntu</a></div>-->
+                    <!--</div>-->
+                    <!--<div class="jkjd_yj tc">当前<font>0</font>条预警</div>-->
+                <!--</div>-->
             </div>
         </div>
         <div id="monitorPage" class="row tab-pane fade">
@@ -207,7 +207,26 @@
             </form>
           <button id = "updateBtn" type="button" class="btn btn-default" onclick="updateBin()">升级</button>
         </div>
-        <div id = "addMonitorNode" class="tab-pane fade">
+        <div id = "addServerNode" class="tab-pane fade">
+            <form role="form">
+            <div class="form-group">
+                <label for="serverIP">IP地址</label>
+                <input type="text" class="form-control" id="serverIP" placeholder="请输入服务器的IP">
+            </div>
+            <div class="form-group">
+                <label for="serverPort">端口</label>
+                <input type="text" class="form-control" id="serverPort" placeholder="请输入服务器的端口">
+            </div>
+            <div class="form-group">
+                <label for="serverUser">用户名</label>
+                <input type="text" class="form-control" id="serverUser" placeholder="请输入服务器登录用户名">
+            </div>
+            <div class="form-group">
+                <label for="serverPassword">密码</label>
+                <input type="text" class="form-control" id="serverPassword" placeholder="请输入服务器的登录密码">
+            </div>
+            <button type="submit" onclick="loginForeignServer()" class="btn btn-default">提交</button>
+        </form>
 
         </div>
     </div>
@@ -242,6 +261,7 @@
 <script src="js/base64.js"></script>
 <script src="js/common.js"></script>
 <script src ="js/monitor.js"></script>
+<script src="js/monitorPlugin.js"></script>
 <script src="index.js"></script>
 <script src="Svc/showSvcPage.js"></script>
 </body>

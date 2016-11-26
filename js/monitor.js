@@ -3,6 +3,7 @@
  */
 var g_getStateUrl = "/action/getstate";
 var g_actionMonitorUrl = "/action/actionMonitor";
+var g_foreignerUrl = "/action/corsService";
 var g_svcStatus = new Map();
 var g_curSvc = "";
 var g_updateLag = 3000; //刷新间隔时间
@@ -84,4 +85,110 @@ function dealListSvcLog(data) {
 		// }
  	}
 	$('#logDiv').scrollTop($('#logDiv').prop("scrollHeight"));
+}
+
+function Server(ip, port)
+{
+	this.ip = ip;
+	this.port = port;
+	this.foreignerFlag = false;
+	this.svcStatu = new Map();
+	this.serverInfo = {};
+	this.init();
+	var localStateUrl = "/action/getstate";
+	var localMonitorUrl = "/action/actionMonitor";
+	var foreignerUrl = "http://{0}:{1}{2}".format(ip, port, "/action/corsService");
+	var freshStateFlag = true;
+	var freshInfoFlag = true;
+	var freshLogFlag = true;
+	var foreignCipher = "";
+	function dealListSvc(data) {
+		var obj = JSON.parse(data);
+		var records = obj.records;
+		for(var i = 0 ; i < records.length; i++) {
+			this.svcStatu.set(records[i].svc_name, records[i]);
+		}
+		freshStateFlag = true;
+	}
+
+	function getLocalSvcState() {
+		if (Boolean(freshStateFlag))
+		{
+			getMonitorData(localStateUrl,"ListSvc", '1.0', "NULL", dealListSvc);
+			freshStateFlag = false;
+		}
+	}
+
+	function dealServerInfo(data) {
+		this.serverInfo = JSON.parse(data);
+		freshInfoFlag = true;
+	}
+
+	function getLocalServerInfo() {
+		if (Boolean(freshInfoFlag)) {
+			getMonitorData(localStateUrl, "GetServerInfo", '1.0', "NULL", dealServerInfo);
+			freshInfoFlag = false;
+		}
+	}
+
+	var logFileLocation = {};
+
+	function dealListSvcLog(data) {
+		var obj = JSON.parse(data);
+		var head = obj.metadata;
+		var records = obj.records;
+		logFileLocation = obj.file_location;
+		freshLogFlag = true;
+	}
+	function getLocalLog() {
+		if (Boolean(freshLogFlag))
+		{
+			var para = {file_location:logFileLocation};
+			getMonitorData(localStateUrl,"ListSvcLog", '1.0', para, dealListSvcLog);
+			freshLogFlag = false;
+		}
+	}
+
+	function getForeignSvcState() {
+		var para = {cipher:foreignCipher};
+		getForeignMonitorData(foreignerUrl, "ListSvc", para, dealListSvc);
+	}
+
+	function getForeignServerInfo() {
+		var para = {cipher:foreignCipher};
+		getForeignMonitorData(foreignerUrl, "GetServerInfo", para, dealServerInfo);
+	}
+	
+	function getForeignLog() {
+		if (Boolean(freshLogFlag))
+		{
+			var para = {cipher:foreignCipher, file_location:logFileLocation};
+			getForeignMonitorData(foreignerUrl,"ListSvcLog", para, dealListSvcLog);
+			freshLogFlag = false;
+		}
+	}
+	var updateLag = 3000;
+	var serverInfoTimer = 0;
+	var svcStatuTimer = 0;
+	var logTimer = 0;
+	
+	this.start = function () {
+		if (this.foreignerFlag == false){
+			serverInfoTimer = setInterval("getLocalServerInfo()",updateLag);
+			svcStatuTimer = setInterval("getLocalSvcState()",updateLag);
+			logTimer = setInterval("getLocalLog()",updateLag);
+		}
+		else
+		{
+			serverInfoTimer = setInterval("getForeignServerInfo()",updateLag);
+			svcStatuTimer = setInterval("getForeignSvcState()",updateLag);
+			logTimer = setInterval("getForeignLog()",updateLag);
+		}
+	}
+
+	this.stop = function () {
+		clearInterval(serverInfoTimer);
+		clearInterval(svcStatuTimer);
+		clearInterval(logTimer);
+	}
 }
