@@ -1,17 +1,8 @@
 /**
  * Created by jerry on 2016/11/7.
  */
-var g_getStateUrl = "/action/getstate";
-var g_actionMonitorUrl = "/action/actionMonitor";
-var g_foreignerUrl = "/action/corsService";
-var g_svcStatus = new Map();
 var g_curSvc = "";
-var g_updateLag = 3000; //刷新间隔时间
-var g_freshStateFlag = true;
-var g_freshLogFlag = true;
-var g_logFileLocation = {};
 var g_maxLogNum = 2000;
-
 //设置用户名
 function setLoginUser()
 {
@@ -20,7 +11,6 @@ function setLoginUser()
 	  {
 	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
 	   	{
-	   		console.log(xmlhttp.responseText);
 		 //举个例子,如果结果是1代表登录成功跳转到index.html，并保存用户名否则提示登录失败消息
 		  var user=xmlhttp.responseText;
             var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + user;
@@ -48,10 +38,6 @@ function dealListSvcLog(data) {
 	var curRecord;
 	var icon;
 	g_logFileLocation = obj.file_location;
-//	AXLOG_TYPE_INFO, 0
-//	AXLOG_TYPE_WARN, 1
-//	AXLOG_TYPE_ERROR, 2
-//	AXLOG_TYPE_DEBUG, 3
 	var type = "";
 	g_freshLogFlag = true;
 	if (records == undefined)
@@ -87,34 +73,45 @@ function dealListSvcLog(data) {
 	$('#logDiv').scrollTop($('#logDiv').prop("scrollHeight"));
 }
 
-function Server(ip, port)
+function Server(ip, port, isForeigner)
 {
 	this.ip = ip;
 	this.port = port;
-	this.foreignerFlag = false;
-	this.svcStatu = new Map();
+	var foreignerFlag = isForeigner;
+	var svcStatu = new Map();
 	this.serverInfo = {};
-	this.init();
 	var localStateUrl = "/action/getstate";
 	var localMonitorUrl = "/action/actionMonitor";
 	var foreignerUrl = "http://{0}:{1}{2}".format(ip, port, "/action/corsService");
 	var freshStateFlag = true;
 	var freshInfoFlag = true;
 	var freshLogFlag = true;
-	var foreignCipher = "";
+	this.foreignCipher = "";
+
+	function serverRequest(func, para, callback) {
+		if (foreignerFlag == false){
+			getMonitorData(localStateUrl,func, '1.0', para, callback);
+		}
+		else{
+			para['cipher'] = this.foreignCipher;
+			getForeignMonitorData(foreignerUrl, func, para, callback);
+		}
+	}
+
 	function dealListSvc(data) {
 		var obj = JSON.parse(data);
 		var records = obj.records;
 		for(var i = 0 ; i < records.length; i++) {
-			this.svcStatu.set(records[i].svc_name, records[i]);
+			svcStatu.set(records[i].svc_name, records[i]);
 		}
 		freshStateFlag = true;
 	}
 
-	function getLocalSvcState() {
+	this.getSvcState = function() {
 		if (Boolean(freshStateFlag))
 		{
-			getMonitorData(localStateUrl,"ListSvc", '1.0', "NULL", dealListSvc);
+			var para = {};
+			serverRequest("ListSvc", para, dealListSvc);
 			freshStateFlag = false;
 		}
 	}
@@ -124,9 +121,10 @@ function Server(ip, port)
 		freshInfoFlag = true;
 	}
 
-	function getLocalServerInfo() {
-		if (Boolean(freshInfoFlag)) {
-			getMonitorData(localStateUrl, "GetServerInfo", '1.0', "NULL", dealServerInfo);
+	this.getServerInfo =  function() {
+		if (freshInfoFlag == true) {
+			var para = {};
+			serverRequest("GetServerInfo", para, dealServerInfo);
 			freshInfoFlag = false;
 		}
 	}
@@ -140,30 +138,11 @@ function Server(ip, port)
 		logFileLocation = obj.file_location;
 		freshLogFlag = true;
 	}
-	function getLocalLog() {
+	this.getLog = function () {
 		if (Boolean(freshLogFlag))
 		{
 			var para = {file_location:logFileLocation};
-			getMonitorData(localStateUrl,"ListSvcLog", '1.0', para, dealListSvcLog);
-			freshLogFlag = false;
-		}
-	}
-
-	function getForeignSvcState() {
-		var para = {cipher:foreignCipher};
-		getForeignMonitorData(foreignerUrl, "ListSvc", para, dealListSvc);
-	}
-
-	function getForeignServerInfo() {
-		var para = {cipher:foreignCipher};
-		getForeignMonitorData(foreignerUrl, "GetServerInfo", para, dealServerInfo);
-	}
-	
-	function getForeignLog() {
-		if (Boolean(freshLogFlag))
-		{
-			var para = {cipher:foreignCipher, file_location:logFileLocation};
-			getForeignMonitorData(foreignerUrl,"ListSvcLog", para, dealListSvcLog);
+			serverRequest("ListSvcLog", para, dealListSvcLog);
 			freshLogFlag = false;
 		}
 	}
@@ -171,24 +150,93 @@ function Server(ip, port)
 	var serverInfoTimer = 0;
 	var svcStatuTimer = 0;
 	var logTimer = 0;
-	
-	this.start = function () {
-		if (this.foreignerFlag == false){
-			serverInfoTimer = setInterval("getLocalServerInfo()",updateLag);
-			svcStatuTimer = setInterval("getLocalSvcState()",updateLag);
-			logTimer = setInterval("getLocalLog()",updateLag);
+	this.startMonitor = function () {
+		 serverInfoTimer = setInterval("g_serverMap.get('{0}').getServerInfo()".format(this.ip),updateLag);
+		 serverInfoTimer = setInterval("g_serverMap.get('{0}').getSvcState()".format(this.ip),updateLag);
+		 serverInfoTimer = setInterval("g_serverMap.get('{0}').getLog()".format(this.ip),updateLag);
+	}
+
+	this.stopMonitor = function () {
+		// clearInterval(serverInfoTimer);
+		// clearInterval(svcStatuTimer);
+		// clearInterval(logTimer);
+	}
+
+	this.startSvc = function (curSvc) {
+		var curObj = svcStatu.get(curSvc);
+		var para = {service_id:curSvc};
+		if (curObj.status_run == 1){
+			alert("当前服务已经启动");
 		}
-		else
-		{
-			serverInfoTimer = setInterval("getForeignServerInfo()",updateLag);
-			svcStatuTimer = setInterval("getForeignSvcState()",updateLag);
-			logTimer = setInterval("getForeignLog()",updateLag);
+		else{ //当前为服务停止状态，点击后启动服务
+			serverRequest("ExecCmdStart", para, "NULL");
 		}
 	}
 
-	this.stop = function () {
-		clearInterval(serverInfoTimer);
-		clearInterval(svcStatuTimer);
-		clearInterval(logTimer);
+	this.stopSvc = function (curSvc) {
+		var curObj = svcStatu.get(curSvc);
+		var para = {service_id:curSvc};
+		if (curObj.status_run == 1) {
+			serverRequest("ExecCmdStop", para, "NULL");
+		}
+		else {
+			alert("当前服务已经停止");
+		}
 	}
+
+	function dealRemoveService(response) {
+		var rsp = JSON.parse(response);
+		var code = parseInt(rsp.code);
+		if (code == 0)
+		{
+			$('#removeResultContent').text("服务删除成功！");
+			$('#removeResultDlg').modal('show');
+		}
+		else{
+			$('#removeResultContent').text("服务删除失败！");
+			$('#removeResultDlg').modal('show');
+		}
+	}
+	this.removeSvc = function (curSvc) {
+		var para = {service_id:curSvc};
+		serverRequest("RemoveSvc", para, dealRemoveService);
+	}
+	var foreignerLst;
+	function dealGetForeignServer(data) {
+		var obj = JSON.parse(data);
+		foreignerLst = obj.content;
+	}
+	this.getFromServer = function () {
+		var req = new Request("1.0", "GetForeignServer", {fileName:"foreignServer.json"});
+		$.ajax({
+			url:localMonitorUrl,
+			data: JSON.stringify(req),
+			async:false,
+			type:"POST",
+			success :dealGetForeignServer
+		});
+	}
+
+	this.saveToServer = function (content) {
+		var para = {fileName:"foreignServer.json", serverLst:content};
+		serverRequest("GetForeignServer", para, "NULL");
+	}
+
+	this.init = function init() {
+		this.getFromServer();
+	}
+	this.getForeignServer = function () {
+		return foreignerLst;
+	}
+	this.getSvcStatus = function () {
+		var desc = "";
+		if (foreignerFlag == false) {
+			desc = "本机";
+		}else
+		{
+			desc = "{0}:{1}".format(this.ip, this.port);
+		}
+		return {desc:desc, svcLst:svcStatu.values()};
+	}
+	this.init();
 }

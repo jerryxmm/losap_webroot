@@ -1,12 +1,20 @@
-
+var g_serverMap = new Map();
 $(function(){
 	setLoginUser();
-	freshSvcState();
-	//  GetServerInfo();
-	//  setInterval("GetServerInfo()",g_updateLag);
-	//  setInterval("freshSvcState()",g_updateLag);
-	//  setInterval("GetLog()",g_updateLag);
-
+	var local = new Server(window.location.host.split(':')[0], window.location.port, false);
+	local.startMonitor();
+	g_serverMap.set(local.ip, local);
+	var serverLst = local.getForeignServer();
+	if (serverLst != undefined)
+	{
+		for(var i = 0; i < serverLst.size; i++)
+		{
+			var foreigner = new Server(serverLst[i].ip, serverLst[i].port, true);
+			foreigner.cipher = serverLst[i].cipher;
+			foreigner.startMonitor();
+			g_serverMap.set(foreigner.ip, foreigner);
+		}
+	}
 	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	//   e.target // newly activated tab
 	//   e.relatedTarget // previous active tab
@@ -26,35 +34,30 @@ $(function(){
             };
 });
 
-function StartMonitor() {
+function Manager() {
+	this.updataLag = 3000;
+	this.init();
+}
+Manager.prototype.init = function () {
+	
+}
+
+Manager.prototype.updateUI = function () {
 	
 }
 
 function initHomePage() {
 	$("#svcView").empty();
-	var svcLst = [];
-	for (var [key, value] of g_svcStatus) {
-		svcLst.push(value);
+	var serverLst = [];
+	for(var i = 0; i < g_serverLst.length; i++){
+		serverLst.push(g_serverLst[i].getSvcStatus());
 	}
-	var localServer = {desc:"本机", svcLst:svcLst};
-	var serverLst = [localServer];
 	$('#svcView').testPlugin(
 		{
 			data:serverLst
 		}
 	);
 }
-
-function SVCInfo(status, status_run, status_alert, version, uptime)
-{
-	this.status = status;
-	this.status_run = status_run;
-	this.status_alert = status_alert;
-	this.version = version;
-	this.uptime = uptime;
-}
-
-
 
 function dealHomeListSvc(data) {
 	var svrLst = dealListSvc(data);
@@ -119,54 +122,12 @@ function dealListSvc(data)
 			}
 		}
  	}
-
 	svrLst +="</ul>"
 	return svrLst;
 }
 
-function startService() {
-	var curObj = g_svcStatus.get(g_curSvc);
-	var para = {service_id:g_curSvc};
-	if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
-	{
-		alert("当前服务已经启动");
-	}
-	else //当前为服务停止状态，点击后启动服务
-	{
-		getMonitorData(g_getStateUrl, "ExecCmdStart", '1.0', para, "NULL");
-	}
-}
-
-function stopService() {
-	var curObj = g_svcStatus.get(g_curSvc);
-	var para = {service_id:g_curSvc};
-	if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
-	{
-		getMonitorData(g_getStateUrl, "ExecCmdStop", '1.0', para, "NULL");
-	}
-	else
-	{
-		alert("当前服务已经停止");
-	}
-}
-
 function addService() {
 	$("#addServiceForm").submit();
-}
-
-function dealRemoveService(response) {
-	var rsp = JSON.parse(response);
-	var code = parseInt(rsp.code);
-	if (code == 0)
-	{
-		$('#removeResultContent').text("服务删除成功！");
-		$('#removeResultDlg').modal('show');
-		//$('#myTab a:first').tab('show');
-	}
-	else{
-		$('#removeResultContent').text("服务删除失败！");
-		$('#removeResultDlg').modal('show');
-	}
 }
 
 function showRemoveConfirmDlg(serviceId) {
@@ -174,10 +135,6 @@ function showRemoveConfirmDlg(serviceId) {
 	$('#confirmRemoveServiceBtn').on("click", function () {
 		removeService(serviceId);
 	})
-}
-function removeService(serviceId) {
-	var para = {service_id:serviceId};
-	getMonitorData(g_actionMonitorUrl, "RemoveSvc", '1.0', para, dealRemoveService);
 }
 
 function loadRemoveServiceList() {
@@ -212,16 +169,6 @@ function dealServerInfo(data) {
 var g_foreignSeverLst = [];
 function dealGetForeignServer(data) {
 	g_foreignSeverLst = JSON.parse(data);
-}
-
-function getForeignServer() {
-	var para = {fileName:"foreignServer.json"};
-	getMonitorData(g_getStateUrl,"GetForeignServer", '1.0', para, dealGetForeignServer);
-}
-
-function saveForeignServer() {
-	var para = {fileName:"foreignServer.json", serverLst:g_foreignSeverLst};
-	getMonitorData(g_getStateUrl,"GetForeignServer", '1.0', para, "NULL");
 }
 
 function dealForeignLogin(data) {
