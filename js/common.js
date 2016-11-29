@@ -74,68 +74,6 @@ function getCookie(cname) {
 //清除cookie  
 function clearCookie(name) {  
     setCookie(name, "", -1);  
-}  
-
-// function cors(){
-// 	var url = "http://192.168.60.135:4101/action/actionMonitor";
-// 	var xhr = createCORSRequest('POST', url);
-// 	if (!xhr) {
-// 	  throw new Error('CORS not supported');
-// 	}
-// 	xhr.onreadystatechange=function()
-//     {
-//       if (xhr.readyState==4 && (xhr.status==200 || xhr.status==302)){
-//             console.log(xhr.responseText);
-//                // var response = xmlhttp.responseText;
-//         }
-//     }
-//
-// 	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-// 	var para = {version:"1.0", func:"ListSvc", param:"NULL"};
-// 	var req = JSON.stringify(para);
-//     xhr.send(req);
-// }
-function createCORSRequest(method, url) {
-  var xhr = new XMLHttpRequest();
-  if ("withCredentials" in xhr) {
-    // 此时即支持CORS的情况
-    // 检查XMLHttpRequest对象是否有“withCredentials”属性
-    // “withCredentials”仅存在于XMLHTTPRequest2对象里
-    xhr.open(method, url, true);
-  }else {
-    // 否则，浏览器不支持CORS
-    xhr = null;
-  }
-  return xhr;
-}
-
-function getForeignMonitorData(url, monitorItem, param, dealDataFunc) {
-    var xhr = createCORSRequest('POST', url);
-	if (!xhr) {
-	  throw new Error('CORS not supported');
-	}
-	xhr.onreadystatechange=function()
-    {
-      if (xhr.readyState==4 && (xhr.status==200 || xhr.status==302)){
-                var response = xhr.responseText;
-                if (typeof(dealDataFunc) == 'function')
-                {
-                    if (dealDataFunc.length == 2)
-                    {
-                        dealDataFunc(response, param.service_id);
-                    }
-                    else
-                    {
-                        dealDataFunc(response);
-                    }
-                }
-        }
-    }
-
-	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-    var req = new Request("1.0", monitorItem, param);
-	var postStr = JSON.stringify(req);
-    xhr.send(postStr);
 }
 
 var Request = function(ver, fun, para)

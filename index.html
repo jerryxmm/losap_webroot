@@ -30,6 +30,7 @@
                     <li><a href="modService.html"><span class="glyphicon glyphicon-pencil"></span> 修改服务</a></li>
                     <li><a href="#updateBinTab" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
                     <li><a href="#addServerNode" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 新增监控节点</a></li>
+                    <li><a href="#removeServerNode" data-toggle="tab"><span class="glyphicon glyphicon-flag"></span> 删除监控节点</a></li>
                 </ul>
             </li>
             <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
@@ -87,10 +88,10 @@
                       <div class="form-inline">
                            <a href="#homePage" data-toggle="tab"><span class="glyphicon glyphicon-home"  data-toggle="tooltip"  title="主页" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>
-                           <a href="#" onclick="startService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px"></span></a>
-                           <a href="#" onclick="stopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
+                           <a href="#" onclick="StartService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px"></span></a>
+                           <a href="#" onclick="StopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
                            <a id="debugTab" href="#debugTab" onclick="startDebug()" data-toggle="tab"><span id = "onlineDebug" class="glyphicon glyphicon-plane" data-toggle="tooltip"  title="在线调试" style="color:#BEBFC0; margin-left: 10px"></span></a>
-                          <a href="#" class="pull-right input-group-addon" onclick="execCmd()" style="margin-top: -5px;"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
+                          <a href="#" class="pull-right input-group-addon" onclick="ExecCmd()" style="margin-top: -5px;"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
                           <input id="sqlText" type="text" class="pull-right" style="margin-top: -3px; width: 300px">
 
                        </div>
@@ -208,26 +209,23 @@
           <button id = "updateBtn" type="button" class="btn btn-default" onclick="updateBin()">升级</button>
         </div>
         <div id = "addServerNode" class="tab-pane fade">
-            <form role="form">
             <div class="form-group">
                 <label for="serverIP">IP地址</label>
-                <input type="text" class="form-control" id="serverIP" placeholder="请输入服务器的IP">
+                <input type="text" class="form-control" id="serverIP" placeholder="请输入服务器的IP" value="192.168.3.173">
             </div>
             <div class="form-group">
                 <label for="serverPort">端口</label>
-                <input type="text" class="form-control" id="serverPort" placeholder="请输入服务器的端口">
+                <input type="text" class="form-control" id="serverPort" placeholder="请输入服务器的端口" value="4101">
             </div>
             <div class="form-group">
                 <label for="serverUser">用户名</label>
-                <input type="text" class="form-control" id="serverUser" placeholder="请输入服务器登录用户名">
+                <input type="text" class="form-control" id="serverUser" placeholder="请输入服务器登录用户名" value="jerry">
             </div>
             <div class="form-group">
                 <label for="serverPassword">密码</label>
-                <input type="text" class="form-control" id="serverPassword" placeholder="请输入服务器的登录密码">
+                <input type="text" class="form-control" id="serverPassword" placeholder="请输入服务器的登录密码" value="12345">
             </div>
-            <button type="submit" onclick="loginForeignServer()" class="btn btn-default">提交</button>
-        </form>
-
+            <button onclick="loginForeignServer()" class="btn btn-default">提交</button>
         </div>
     </div>
 <div class="row" style="margin-left: 0px;margin-right: 0px">
@@ -252,6 +250,7 @@
     </div>
 </div>
 </div>
+</div>
 <script src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/bootstrap-table.js"></script>
@@ -260,9 +259,9 @@
 <script src="js/fileinput.js"></script>
 <script src="js/base64.js"></script>
 <script src="js/common.js"></script>
+<script src="Svc/showSvcPage.js"></script>
 <script src ="js/monitor.js"></script>
 <script src="js/monitorPlugin.js"></script>
 <script src="index.js"></script>
-<script src="Svc/showSvcPage.js"></script>
 </body>
 </html>
