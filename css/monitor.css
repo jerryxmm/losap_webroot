@@ -13,17 +13,17 @@ img{ border:none;}
 .tc{ text-align:center;}
 .tr{ text-align:right;}
 
-#sidebar >ul{
-    padding: 0px;
-}
+/*#sidebar >ul{*/
+    /*padding: 0px;*/
+/*}*/
 
-#sidebar > ul > li.active > a {
-	background-image: url("../images/menu-active.png");
-	background-repeat: no-repeat;
-	background-position: right center;
-	background-color:#e7f1f7;
-	text-decoration:none;
-}
+/*#sidebar > ul > li.active > a {*/
+	/*background-image: url("../images/menu-active.png");*/
+	/*background-repeat: no-repeat;*/
+	/*background-position: right center;*/
+	/*background-color:#e7f1f7;*/
+	/*text-decoration:none;*/
+/*}*/
 
 /*系统首页*/
 .fs12{ margin-left:60%;font-size:12px;}
@@ -50,13 +50,16 @@ img{ border:none;}
 	padding-bottom: 30px;
 }
 
-.jkjd_fw{width: 90%; height:130px; background-color:#fbfbfb; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
-.jkjd_fw a{margin-left:12px; border-bottom:1px solid #ddd; font-size:14px;}
-.jkjd_fw span img{ margin:12px 12px 0px 0px;}
+.active_svc{width: 90%; height:130px; background-color:#90C083; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.active_svc a{margin-left:12px; font-size:14px;color:white}
+.active_svc span img{ margin:12px 12px 0px 0px;}
+
+.inactive_svc{width: 90%; height:130px; background-color:red; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+
 .jkjd_fwname{ margin-right:30px; padding-left:15px;}
 .jkjd_fwname a:hover{ color:#52b6e3;}
-.jkjd_yj{ margin-top:10px; border-top:1px solid #ddd; font-size:14px; color:#666;}
-.jkjd_yj font{ font-size:18px; margin:0px 5px; display:inline-block; vertical-align:text-bottom;}
+.jkjd_yj{ margin-top:10px; margin-left:0%; width: 100%; background-color:#fbfbfb; height: 76%; border-top:1px solid #ddd; font-size:14px; color:#666;}
+.jkjd_yj font{ font-size:16px; margin:0px 5px; display:inline-block; vertical-align:text-bottom;}
 #addServiceTab{
 	min-height: 240px;
 	padding: 10px 20px;
@@ -73,7 +76,7 @@ img{ border:none;}
 	margin-top: 10px;
 }
 
-#updateBinTab{
+#updateBinTab, #modServiceTab, #removeServiceTab, #removeServerNode{
 	min-height: 240px;
 	padding: 10px 20px;
 }
@@ -97,4 +100,14 @@ img{ border:none;}
 
 .info{
 	margin:0px 0px 0px 0px;
+}
+
+/*#sidebar > ul > li.open.submenu > a {*/
+	/*border-bottom: none !important;*/
+/*}*/
+.submenu {
+	background-color: #2E363F;
+}
+.submenu span {
+	color:white;
 }

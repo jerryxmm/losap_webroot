@@ -24,6 +24,7 @@
         // console.log($(element));
         // console.log(options);
         this.init();
+        g_intance.stopUpdateUI();
     };
     nodeGroup.prototype.init = function () {
         var data = this.options.data;
@@ -41,13 +42,17 @@
         }
         sideBarHtml += "</ul>";
         var sideBar = this.options.sideBar;
+        $(sideBar).empty();
         $(sideBar).html(sideBarHtml);
     };
 
     nodeGroup.prototype.initTreeMenu = function (serverNode) {
         var records = serverNode.svcLst;
-        var svrLst = " <li class='submenu' isSpan='true'> <a href='#' onclick='clickSubmenu(\"{2}\")'> <span>{0}</span> <span class='label label-important'>{1}</span></a>".format(serverNode.desc, records.length, serverNode.desc) +
-            "<ul class='nav nav-list'>";
+        var hideStr = "";
+        if (serverNode.sideBarHide)
+            hideStr = "style='display:none'";
+        var svrLst = " <li class='submenu' isSpan='true'> <a href='#' onclick='clickSubmenu(\"{2}\")'> <span>{0}</span> <span class='label label-important'>{1}</span></a>".format(serverNode.desc, records.length, serverNode.ip) +
+            "<ul id='{1}' class='nav nav-list' {0}>".format(hideStr, serverNode.ip);
         var color;
         var curRecord;
         var icon;
@@ -73,7 +78,7 @@
                 alertFlag = "";
             }
             var isActive="";
-            if (g_curSvc == curRecord.svc_name)
+            if (g_curServiceId == curRecord.svc_name && g_curIp == serverNode.ip)
             {
                 isActive = "active";
             }
@@ -109,24 +114,27 @@
         var nodeWidth = 12/this.options.inlineNum;
         var nodeWidthClass = "col-lg-{0} col-md-{1} col-sm-{3}".format(nodeWidth, nodeWidth+1, nodeWidth+2);
         var image = "", userColor = "";
+        var svcStyle = "";
         for(var i = 0; i < data.length; i++)
         {
             if (data[i].status_run == 1)
             {
                 image = "../images/jdzt_green_pic.png";
                 userColor = "green";
+                svcStyle = "active_svc";
             }
             else
             {
                 image = "images/jdzt_red_pic.png";
                 userColor = "red";
+                svcStyle = "inactive_svc";
             }
             var node = "<div id='{0}' class='{1}'>".format("nodeCode" + i, nodeWidthClass) +
-                    "<div class = 'jkjd_fw'>" +
+                    "<div class = '{0}'>".format(svcStyle) +
                 "<a href='{0}' data-toggle='tab' onclick='showSvcPage(\"{3}\", \"{4}\")'>{1}</a><span class='r tc'><img src='{2}' ></span>".format(this.options.tabShow, data[i].svc_name, image, serverNode.ip, data[i].svc_name) +
                     "<div class='row jkjd_yj'>" +
-                    "<div class='col-lg-3 col-md-3'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
-                    "<div class='col-lg-6 col-md-6 col-lg-offset-2 col-md-offset-2'>" +
+                    "<div class='col-lg-2 col-md-2'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
+                    "<div class='col-lg-9 col-md-9 col-lg-offset-1 col-md-offset-1'>" +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.allProcDesc, data[i].all_proc) +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.unprocDesc, data[i].unproc) +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.procSpeedDesc, data[i].proc_speed) +

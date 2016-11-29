@@ -19,8 +19,9 @@ function setLoginUser()
 	  }
 }
 
-function Server(ip, port, isForeigner)
+function Server(desc, ip, port, isForeigner)
 {
+	this.desc = desc;
 	this.ip = ip;
 	this.port = port;
 	var mySelf = this;
@@ -36,6 +37,7 @@ function Server(ip, port, isForeigner)
 	var freshLogFlag = true;
 	this.cipher = "";
 	this.foreignerLst = [];
+	this.sideBarHide = false;
 
 	this.serverRequest = function(func, para, callback) {
 		if (foreignerFlag == false){
@@ -214,12 +216,12 @@ function Server(ip, port, isForeigner)
 		var code = parseInt(rsp.code);
 		if (code == 0)
 		{
-			$('#removeResultContent').text("服务删除成功！");
-			$('#removeResultDlg').modal('show');
+			$('#TipContent').text("服务删除成功！");
+			$('#TipDlg').modal('show');
 		}
 		else{
-			$('#removeResultContent').text("服务删除失败！");
-			$('#removeResultDlg').modal('show');
+			$('#TipContent').text("服务删除失败！");
+			$('#TipDlg').modal('show');
 		}
 	}
 	this.removeSvc = function (curSvc) {
@@ -249,11 +251,25 @@ function Server(ip, port, isForeigner)
 		this.serverRequest("SaveForeignServer", para, "NULL");
 	};
 
-	this.addForeignerToServer = function (cipher, ip, port) {
-		var fore = {cipher:cipher, ip:ip, port:port};
+	this.addForeignerToServer = function (cipher, ip, port, desc) {
+		var fore = {cipher:cipher, ip:ip, port:port, desc:desc};
 		this.foreignerLst.push(fore);
 		this.saveToServer(JSON.stringify(this.foreignerLst));
+	};
+
+	this.removeForeigner = function (ip) {
+		for(var i = 0; i < this.foreignerLst.length; i++)
+		{
+			if (this.foreignerLst[i].ip == ip){
+				this.foreignerLst.splice(i, 1);
+				break;
+			}
+		}
+		this.saveToServer(JSON.stringify(this.foreignerLst));
+		$('#TipContent').text("服务器节点删除成功！");
+		$('#TipDlg').modal('show');
 	}
+
 
 	function ShowListSvcItem(str, serviceId)
 	{
@@ -358,13 +374,13 @@ function Server(ip, port, isForeigner)
 			desc = "本机";
 		}else
 		{
-			desc = "{0}:{1}".format(this.ip, this.port);
+			desc = this.desc;
 		}
 		var svcLst = [];
 		svcStatu.forEach(function (value, key) {
 			svcLst.push(value);
 		});
-		return {desc:desc, ip:this.ip, svcLst:svcLst};
+		return {desc:desc, sideBarHide:this.sideBarHide, ip:this.ip, svcLst:svcLst};
 	};
 
 	this.getSvc = function (serviceId) {
@@ -448,29 +464,127 @@ function Server(ip, port, isForeigner)
 		$("#debugTab").attr("isDebug", "off");
 		$("#onlineDebug").css({"color":"#BEBFC0"});
 		clearInterval(debugTimerId);
+	};
+
+	function traverseNode(node, layer) {
+    if (node.nodeName == "#text")
+        return;
+	var desc = "";
+	var atts = node.attributes;
+	if (layer != 1)
+	{
+		if (atts != undefined)
+		{
+			desc = node.nodeName;
+			if (node.hasAttribute("ps"))
+			{
+					desc = desc + "--" + node.getAttribute("ps");
+			}
+
+			for(var i = 0; i < atts.length; i++)
+			{
+				var att = atts[i];
+				console.log(att.name + "***"+att.nodeValue);
+				if (att.name == "ps") {
+					continue
+				}
+				else if (att.name == "Value")
+				{
+					var length =node.getAttribute("Value").length * 5;
+					$("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px' attr = '{3}'>{1}</div>"
+						.format(att.nodeValue, desc, node.nodeName,att.name));
+				}
+				else
+				 {
+					 $("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px'  attr = '{3}'>{1}</div>"
+						.format(att.nodeValue, att.name, node.nodeName, att.name));
+				 }
+			}
+		}
+	}
+
+	if (layer == 2)
+	{
+		$('#content').append("<h5 style=\"font-weight:bold;\">{0}</h5>".format(desc));
+	}
+    var children = node.childNodes;
+    for(var i = 0; i < children.length; i++)
+    {
+        var child = children[i];
+        traverseNode(child, layer+1);
+    }
+}
+
+var g_xmlDoc;
+function dealSvcXml(response, serviceId) {
+    var obj = JSON.parse(response);
+    var xml = obj.content;
+	parser=new DOMParser();
+    g_xmlDoc=parser.parseFromString(xml,"text/xml");
+	$('#content').empty();
+	$('#curSvc').text(serviceId);
+    traverseNode(g_xmlDoc.documentElement, 1);
+	$('.configValue').on('input', function() {
+		var node = g_xmlDoc.getElementsByTagName($(this).attr('name'));
+		var attr = $(this).attr('attr');
+		node[0].setAttribute(attr, $(this).val());
+	});
+}
+
+	this.modService = function () {
+		var para = {};
+		para.service_id = serviceId;
+		this.serverRequest("GetSvcXml", para, dealSvcXml);
+	};
+
+	function XML2String(xmlObject) {
+		return (new XMLSerializer()).serializeToString(xmlObject);
+	};
+
+	this.saveXml = function() {
+		if (g_xmlDoc == undefined)
+			return;
+		var content = XML2String(g_xmlDoc);
+		var para = {};
+		var ddd = $('#curSvc');
+		para.service_id = ddd[0].innerText;
+		para.content = content;
+		this.serverRequest("SaveSvcXml", para, "NULL");
 	}
 	this.init();
 };
 
-function clickSubmenu(desc)
+// function clickSubmenu(desc)
+// {
+// 	var submenu = $(this).siblings('ul');
+// 	var submenus = $('#sidebar li.submenu');
+// 	for(var i = 0; i < submenus.length; i++)
+// 	{
+// 		var tmp = submenus[i];
+// 		var span = $(tmp).find("span");
+// 		if ($(span[0]).html() != desc) {
+// 			continue;
+// 		}
+// 		var dest = $(tmp).find("ul")[0];
+// 		if ($(tmp).attr("isSpan") == 'true') {
+// 			$(dest).slideDown();
+// 			$(tmp).attr("isSpan", 'false');
+// 		}
+// 		else{
+// 			$(dest).slideUp();
+// 			$(tmp).attr("isSpan", 'true');
+// 		}
+// 	}
+// }
+function clickSubmenu(ip)
 {
-	var submenu = $(this).siblings('ul');
-	var submenus = $('#sidebar li.submenu');
-	for(var i = 0; i < submenus.length; i++)
-	{
-		var tmp = submenus[i];
-		var span = $(tmp).find("span");
-		if ($(span[0]).html() != desc) {
-			continue;
-		}
-		var dest = $(tmp).find("ul")[0];
-		if ($(tmp).attr("isSpan") == 'true') {
-			$(dest).slideDown();
-			$(tmp).attr("isSpan", 'false');
-		}
-		else{
-			$(dest).slideUp();
-			$(tmp).attr("isSpan", 'true');
-		}
+	var server = g_intance.getServer(ip);
+	var js = document.getElementById(ip);
+	if (server.sideBarHide){
+		$(js).slideDown();
+		server.sideBarHide = false;
+	}else{
+		$(js).slideUp();
+		server.sideBarHide = true;
 	}
 }
