@@ -24,7 +24,7 @@
         // console.log($(element));
         // console.log(options);
         this.init();
-        g_intance.stopUpdateUI();
+       // g_intance.stopUpdateUI();
     };
     nodeGroup.prototype.init = function () {
         var data = this.options.data;
@@ -133,8 +133,8 @@
                     "<div class = '{0}'>".format(svcStyle) +
                 "<a href='{0}' data-toggle='tab' onclick='showSvcPage(\"{3}\", \"{4}\")'>{1}</a><span class='r tc'><img src='{2}' ></span>".format(this.options.tabShow, data[i].svc_name, image, serverNode.ip, data[i].svc_name) +
                     "<div class='row jkjd_yj'>" +
-                    "<div class='col-lg-2 col-md-2'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
-                    "<div class='col-lg-9 col-md-9 col-lg-offset-1 col-md-offset-1'>" +
+                    "<div class='col-lg-3 col-md-3'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
+                    "<div class='col-lg-9 col-md-9'>" +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.allProcDesc, data[i].all_proc) +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.unprocDesc, data[i].unproc) +
                         "<p class='info'>{0}<span class='fs20'>{1}</span></p>".format(this.options.procSpeedDesc, data[i].proc_speed) +

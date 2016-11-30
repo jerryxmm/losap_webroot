@@ -491,12 +491,12 @@ function Server(desc, ip, port, isForeigner)
 				else if (att.name == "Value")
 				{
 					var length =node.getAttribute("Value").length * 5;
-					$("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px' attr = '{3}'>{1}</div>"
+					$("#xmlContent").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px' attr = '{3}'>{1}</div>"
 						.format(att.nodeValue, desc, node.nodeName,att.name));
 				}
 				else
 				 {
-					 $("#content").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px'  attr = '{3}'>{1}</div>"
+					 $("#xmlContent").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px'  attr = '{3}'>{1}</div>"
 						.format(att.nodeValue, att.name, node.nodeName, att.name));
 				 }
 			}
@@ -505,7 +505,7 @@ function Server(desc, ip, port, isForeigner)
 
 	if (layer == 2)
 	{
-		$('#content').append("<h5 style=\"font-weight:bold;\">{0}</h5>".format(desc));
+		$('#xmlContent').append("<h5 style=\"font-weight:bold;\">{0}</h5>".format(desc));
 	}
     var children = node.childNodes;
     for(var i = 0; i < children.length; i++)
@@ -515,23 +515,22 @@ function Server(desc, ip, port, isForeigner)
     }
 }
 
-var g_xmlDoc;
-function dealSvcXml(response, serviceId) {
-    var obj = JSON.parse(response);
-    var xml = obj.content;
-	parser=new DOMParser();
-    g_xmlDoc=parser.parseFromString(xml,"text/xml");
-	$('#content').empty();
-	$('#curSvc').text(serviceId);
-    traverseNode(g_xmlDoc.documentElement, 1);
-	$('.configValue').on('input', function() {
-		var node = g_xmlDoc.getElementsByTagName($(this).attr('name'));
-		var attr = $(this).attr('attr');
-		node[0].setAttribute(attr, $(this).val());
-	});
-}
+	var xmlDoc;
+	function dealSvcXml(response, serviceId) {
+		var obj = JSON.parse(response);
+		var xml = obj.content;
+		parser=new DOMParser();
+		xmlDoc=parser.parseFromString(xml,"text/xml");
+		$('#xmlContent').empty();
+		traverseNode(xmlDoc.documentElement, 1);
+		$('.configValue').on('input', function() {
+			var node = xmlDoc.getElementsByTagName($(this).attr('name'));
+			var attr = $(this).attr('attr');
+			node[0].setAttribute(attr, $(this).val());
+		});
+	};
 
-	this.modService = function () {
+	this.getSvcXml = function (serviceId) {
 		var para = {};
 		para.service_id = serviceId;
 		this.serverRequest("GetSvcXml", para, dealSvcXml);
@@ -541,41 +540,18 @@ function dealSvcXml(response, serviceId) {
 		return (new XMLSerializer()).serializeToString(xmlObject);
 	};
 
-	this.saveXml = function() {
-		if (g_xmlDoc == undefined)
+	this.saveXml = function(serviceId) {
+		if (xmlDoc == undefined)
 			return;
-		var content = XML2String(g_xmlDoc);
+		var content = XML2String(xmlDoc);
 		var para = {};
-		var ddd = $('#curSvc');
-		para.service_id = ddd[0].innerText;
+		para.service_id = serviceId;
 		para.content = content;
 		this.serverRequest("SaveSvcXml", para, "NULL");
-	}
+	};
 	this.init();
 };
 
-// function clickSubmenu(desc)
-// {
-// 	var submenu = $(this).siblings('ul');
-// 	var submenus = $('#sidebar li.submenu');
-// 	for(var i = 0; i < submenus.length; i++)
-// 	{
-// 		var tmp = submenus[i];
-// 		var span = $(tmp).find("span");
-// 		if ($(span[0]).html() != desc) {
-// 			continue;
-// 		}
-// 		var dest = $(tmp).find("ul")[0];
-// 		if ($(tmp).attr("isSpan") == 'true') {
-// 			$(dest).slideDown();
-// 			$(tmp).attr("isSpan", 'false');
-// 		}
-// 		else{
-// 			$(dest).slideUp();
-// 			$(tmp).attr("isSpan", 'true');
-// 		}
-// 	}
-// }
 function clickSubmenu(ip)
 {
 	var server = g_intance.getServer(ip);

@@ -44,8 +44,18 @@ Manager.prototype.init = function () {
 	this.updateUI();
 };
 
-Manager.prototype.getServer = function (ip) {
-	return this.serverMap.get(ip);
+Manager.prototype.getServer = function (ipOrDesc) {
+	var server = this.serverMap.get(ipOrDesc);
+	if (server == undefined)
+	{
+		for (var value of this.serverMap.values()) {
+			if (value.desc == ipOrDesc){
+				server = value;
+				break;
+			}
+		}
+	}
+	return server;
 };
 
 Manager.prototype.updateUI = function () {
@@ -63,17 +73,6 @@ Manager.prototype.getSvc = function (ip, serviceId) {
 }
 $(function(){
 	setLoginUser();
-	// $('#ttt[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-	//   e.target // newly activated tab
-	//   e.relatedTarget // previous active tab
-	// 	initHomePage();
-	// })
-	// var tab = getQueryString("tab");
-	// if (tab != null)
-	// {
-	// 	$('#myTab a[href="#{0}"]'.format(tab)).tab('show');
-	// }
-
 	document.querySelector('ul[id=monitorObject]').onclick = function (e) {
                 $('#monitorObject > li').removeClass('active');
                 var target = e.target;
@@ -126,11 +125,6 @@ function updateBin() {
 	$("#updateBinForm").submit();
 }
 
-var g_foreignSeverLst = [];
-function dealGetForeignServer(data) {
-	g_foreignSeverLst = JSON.parse(data);
-}
-
 function dealForeignLogin(data) {
 	console.log(data);
 	var obj = JSON.parse(data);
@@ -150,4 +144,74 @@ function loginForeignServer() {
 	var url = "http://{0}:{1}{2}".format(ip, port, "/action/corsService");
 	var para = {userName:userName, password:pass};
 	getMonitorData(url, "ForeignLogin", "1.0", para, dealForeignLogin);
+}
+
+function saveXmlConfig() {
+	var showText = $('#curSvc').val();
+	var ip = showText.split(':')[0];
+	var serviceId = showText.split(':')[1];
+	var server = g_intance.getServer(ip);
+	server.saveXml(serviceId);
+}
+
+function showXmlConfig(ip, serviceId) {
+	var server = g_intance.getServer(ip);
+	var showText = "{0}:{1}".format(ip, serviceId);
+	$('#curSvc').text(showText);
+	server.getSvcXml(serviceId);
+}
+
+function generateSideBarNode(serverNode) {
+	var records = serverNode.svcLst;
+	var hideStr = "";
+	if (serverNode.sideBarHide)
+		hideStr = "style='display:none'";
+	var svrLst = " <li class='modSvcSubmenu' isSpan='true'> <a href='#'> <span>{0}</span> <span class='label label-important'>{1}</span></a>".format(serverNode.desc, records.length) +
+		"<ul class='nav nav-list'>";
+	var color;
+	var curRecord;
+	var icon;
+	for(var i = 0 ; i < records.length; i++)
+	{
+		curRecord= records[i];
+		if (curRecord.status_run == 1){
+			icon = 'glyphicon-play';
+			color = 'green';
+		}
+		else {
+			icon = 'glyphicon-stop';
+			color = 'red';
+		}
+		var svc =  "<li><a class='list-group-item' href='#' onclick='showXmlConfig(\"{3}\", \"{4}\")'><span class='glyphicon {0}' style='color:{1}'></span>{2}</a></li>"
+		.format(icon, color, curRecord.svc_name, serverNode.ip, curRecord.svc_name);
+		svrLst += svc;
+	}
+	svrLst +=   "</ul>" +
+			"</li>";
+	return svrLst;
+}
+
+function loadModService() {
+	$("#modServiceSidebar").empty();
+	var sideBarHtml = "<ul class='nav nav-list'>";
+	g_intance.serverMap.forEach(function (value, key) {
+		sideBarHtml += generateSideBarNode(value.getSvcStatus());
+	});
+	sideBarHtml += "</ul>";
+	$('#modServiceSidebar').html(sideBarHtml);
+
+	$('.modSvcSubmenu > a').click(function(e)
+	{
+		e.preventDefault();
+		var submenu = $(this).siblings('ul');
+		var li = $(this).parents('li');
+		var ul = $(li).find('ul').first()[0];
+		if(li.hasClass('open'))
+		{	$(ul).slideDown();
+			li.removeClass('open');
+		} else
+		{	$(ul).slideUp();
+			li.addClass('open');
+		}
+	});
 }
