@@ -49,9 +49,9 @@ img{ border:none;}
 }
 .jkjd_sj_item{ margin-left:90px; margin-right:10px;}
 .jkjd_sj_item span{ width:50%; display:inline-block; vertical-align:top; color:#FFF; margin-top:22px;}
-.jkjd_fw_title{ margin-left:1%; margin-right:1%; margin-bottom: 20px; border:1px solid #ddd; border-radius:2px; background-color:#f8f8f8; color:#555; font-size:16px; padding-left:15px;}
+.jkjd_fw_title{ margin-left:1%; margin-right:1%; margin-bottom: 20px; border:1px solid #ddd; background-color:#f8f8f8; color:#555;height: 2px}
 #homePage{
-	height: 600px;
+	/*height: 600px;*/
 }
 
 #svcView{
@@ -62,7 +62,8 @@ img{ border:none;}
 .active_svc a{margin-left:12px; font-size:14px;color:white}
 .active_svc span img{ margin:12px 12px 0px 0px;}
 
-.inactive_svc{width: 90%; height:130px; background-color:red; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.inactive_svc{width: 90%; height:130px; background-color:#AE4141; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.inactive_svc a{margin-left:12px; font-size:14px;color:white}
 
 .jkjd_fwname{ margin-right:30px; padding-left:15px;}
 .jkjd_fwname a:hover{ color:#52b6e3;}
@@ -118,4 +119,38 @@ img{ border:none;}
 }
 .submenu span {
 	color:white;
+}
+
+.maintance{
+	width: 50%;
+	margin-top:20px;
+	margin-bottom:50px;
+	margin-left: 20%;
+	margin-right: 20%;
+
+}
+#logHead{
+	padding: 0px;
+	background: white
+}
+
+#monitorLog{
+	margin-left: 0px;
+	margin-right: 0px
+}
+
+#logDiv{
+	background-color: white;
+	overflow-x:auto;
+	overflow-y: scroll;
+}
+#logArea{
+	margin-bottom: 0px;
+}
+
+#mainBody{
+	overflow-x:hidden;
+	overflow-y:scroll;
+	margin-top: 60px;
+	background-color: #FFFFFF;
 }

@@ -20,22 +20,21 @@
         this.$element = $(element);
         $(element).empty();
         this.options = options;
-        // console.log(element);
-        // console.log($(element));
-        // console.log(options);
         this.init();
-        g_intance.stopUpdateUI();
     };
     nodeGroup.prototype.init = function () {
         var data = this.options.data;
         this.initServerHead("");
         var sideBarHtml = "<ul class='nav nav-list'>";
+        var allHomeView = "<div class='row' style='margin-left: 10px'>";
         for(var i = 0; i < data.length; i++)
         {
             var serverNode = data[i];
-            this.initServerHomeView(serverNode);
+            allHomeView += this.initServerHomeView(serverNode);
             sideBarHtml += this.initTreeMenu(serverNode);
         }
+        allHomeView += "</div>";
+        this.$element.append(allHomeView);
         sideBarHtml += "</ul>";
         var sideBar = this.options.sideBar;
         $(sideBar).empty();
@@ -66,7 +65,7 @@
             }
             if (curRecord.status_alert == 1)
             {
-                alertFlag = "<span class='glyphicon glyphicon-exclamation-sign'  style='color:yellow; float:right'> </span>";
+                alertFlag = "<span class='glyphicon glyphicon-exclamation-sign'  style='color:darkgoldenrod; float:right'> </span>";
             }
             else
             {
@@ -98,33 +97,32 @@
     }
 
     nodeGroup.prototype.initServerHead = function (desc) {
-        this.$element.append("<div class='jkjd_fw_title'>{0}</div>".format(desc + '服务节点情况'));
+        this.$element.append("<div class='jkjd_fw_title'></div>");
+        //s this.$element.append("<div class='jkjd_fw_title'>{0}</div>".format(desc + '服务节点情况'));
     };
 
     nodeGroup.prototype.initServerHomeView = function (serverNode) {
-        var data = serverNode.svcLst;
-        var homeView = "<div class='row' style='margin-left: 10px'>";
+        var homeView = "";
         var nodeWidth = 12/this.options.inlineNum;
         var nodeWidthClass = "col-lg-{0} col-md-{1} col-sm-{3}".format(nodeWidth, nodeWidth+1, nodeWidth+2);
+        var data = serverNode.svcLst;
         var image = "", userColor = "";
         var svcStyle = "";
         for(var i = 0; i < data.length; i++)
         {
             if (data[i].status_run == 1)
             {
-                image = "../images/jdzt_green_pic.png";
-                userColor = "green";
+                userColor = "#90C083";
                 svcStyle = "active_svc";
             }
             else
             {
-                image = "images/jdzt_red_pic.png";
-                userColor = "red";
+                userColor = "#AE4141";
                 svcStyle = "inactive_svc";
             }
             var node = "<div id='{0}' class='{1}'>".format("nodeCode" + i, nodeWidthClass) +
                     "<div class = '{0}'>".format(svcStyle) +
-                "<a href='{0}' data-toggle='tab' data-toggle='tooltip' title='{5}' onclick='showSvcPage(\"{3}\", \"{4}\")'>{1}</a><span class='r tc'><img src='{2}' ></span>".format(this.options.tabShow, data[i].svc_name, image, serverNode.ip, data[i].svc_name, serverNode.ip) +
+                "<a href='{0}' data-toggle='tab' data-toggle='tooltip' title='{4}' onclick='showSvcPage(\"{2}\", \"{3}\")'>{1}</a><span class='r tc'></span>".format(this.options.tabShow, data[i].svc_name, serverNode.ip, data[i].svc_name, serverNode.ip) +
                     "<div class='row jkjd_yj'>" +
                     "<div class='col-lg-3 col-md-3'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
                     "<div class='col-lg-9 col-md-9'>" +
@@ -137,8 +135,7 @@
                 "</div>";
             homeView += node;
         }
-        homeView += "</div>";
-        this.$element.append(homeView);
+        return homeView;
     };
 
     var allowedMethods = [

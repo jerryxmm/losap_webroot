@@ -4,6 +4,31 @@
 var g_curSvc = "";
 var g_maxLogNum = 2000;
 //设置用户名
+var g_curLogLevel = "all";
+function doShowLog(type) {
+	if (type == 'all'){
+		$('#logArea > .list-group-item').show();
+		$('#infoBtn').css("background-color", "#C0DCF3");
+		$('#warningBtn').css("background-color", "");
+		$('#errorBtn').css("background-color", "");
+	}else if (type == 'warning'){
+		$('#infoBtn').css("background-color", "");
+		$('#warningBtn').css("background-color", "#C0DCF3");
+		$('#errorBtn').css("background-color", "");
+		$('#logArea > .list-group-item').hide();
+		$('#logArea > .list-group-item-warning').show();
+		$('#logArea > .list-group-item-danger').show();
+	}else if (type == 'error'){
+		$('#infoBtn').css("background-color", "");
+		$('#warningBtn').css("background-color", "");
+		$('#errorBtn').css("background-color", "#C0DCF3");
+		$('#logArea > .list-group-item').hide();
+		$('#logArea > .list-group-item-danger').show();
+	}else {
+		$('#logArea > .list-group-item').show();
+	}
+	g_curLogLevel = type;
+}
 
 function Server(desc, ip, port, isForeigner, cipher, user)
 {
@@ -47,8 +72,22 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	}
 
 	this.getAllService = function() {
-		var para = {};
-		this.serverRequest("ListSvc", para, dealListSvc);
+		var para = {cipher:this.cipher};
+		//this.serverRequest("ListSvc", para, dealListSvc);
+		var req = new Request("1.0", "ListSvc", para);
+		var url = "";
+		if (this.foreignerFlag){
+			url =foreignerUrl;
+		}else{
+			url = localMonitorUrl;
+		}
+		$.ajax({
+			url:url,
+			data: JSON.stringify(req),
+			async:false,
+			type:"POST",
+			success :dealListSvc
+		});
 	}
 
 	function dealServerInfo(data) {
@@ -80,6 +119,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		freshLogFlag = true;
 		if (records == undefined)
 			return;
+		var lis = "";
 		for(var i = 0 ; i < records.length; i++)
 		{
 			curRecord= records[i];
@@ -101,14 +141,16 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			}
 			var myAuto = document.getElementById('alarmAudio');
 			//myAuto.play();
-			$('#logArea').append(li);
-			// var lis=logArea
-			// if (lis.length > g_maxLogNum)
-			// {
-			// 	lis[0].remove();
-			// }
+			lis +=li;
 		}
+		$('#logArea').append(lis);
+		doShowLog(g_curLogLevel);
 		$('#logDiv').scrollTop($('#logDiv').prop("scrollHeight"));
+		// var lis=logArea
+		// if (lis.length > g_maxLogNum)
+		// {
+		// 	lis[0].remove();
+		// }
 	}
 
 	this.getLog = function () {
@@ -148,7 +190,8 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	var svcStatuTimer = 0;
 	var logTimer = 0;
 	this.startMonitor = function () {
-		 //serverInfoTimer = setInterval("g_intance.getServer('{0}').getServerInfo()".format(this.ip),updateLag);
+		this.getMonitorServiceStatu();
+		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getServerInfo()".format(this.ip),updateLag);
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getMonitorServiceStatu()".format(this.ip),updateLag);
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getLog()".format(this.ip),updateLag);
 	};
@@ -583,7 +626,7 @@ Manager.prototype.getServer = function (ipOrDesc) {
 };
 
 Manager.prototype.updateUI = function () {
-	//this.showHomePage();
+	this.showHomePage();
 	this.updateUiTimer = setInterval("g_intance.showHomePage()", this.updataLag);
 };
 

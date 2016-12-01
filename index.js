@@ -1,4 +1,4 @@
-var g_intance;;
+var g_intance;
 $(function(){
 	setLoginUser();
 	document.querySelector('ul[id=monitorObject]').onclick = function (e) {
@@ -10,8 +10,18 @@ $(function(){
 	window.onbeforeunload = function () {
 		
 	};
+	doOnResize();
 });
 
+function doOnResize() {
+	var hg = Math.round(document.documentElement.clientHeight*0.35);
+	$('#logDiv').height(hg);
+	if($("#logDiv").is(":hidden")){
+		Math.round(document.documentElement.clientHeight*0.8)
+	}else{
+		$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.5));
+	}
+}
 
 function setLoginUser()
 {
@@ -29,8 +39,29 @@ function setLoginUser()
 	  }
 }
 
+function doAddMonitorService() {
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
+}
+
+function doHomePage() {
+	$('#monitorLog').show();
+	doOnResize();
+	console.log("doHomePage");
+}
+
 function addService() {
 	$("#addServiceForm").submit();
+}
+
+function doAddServiceTab() {
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
+}
+
+function doUpdateBinTab() {
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
 }
 
 function showRemoveSvcConfirmDlg(ip, serviceId) {
@@ -46,10 +77,20 @@ function loadRemoveServiceList() {
 	var svcLst = svcStatus.svcLst;
 	var items ="";
 	g_intance.serviceMap.forEach(function (ip, serviceId) {
-		var item = "<a href=\"#\"  onclick=\"showRemoveSvcConfirmDlg('{0}', '{1}')\" class=\"list-group-item\" data-toggle=\"modal\" data-target=\"#removeConfirm\"><span class=\"glyphicon glyphicon-minus-sign pull-right\" style=\"color:red\"></span>{2}</a>".format(ip, serviceId, serviceId);
+		var server = g_intance.getServer(ip);
+		var value = server.getSvc(serviceId);
+		var item ="";
+		if (value.status_run == 1){
+			item =  "<a href='#' class='list-group-item disabled' ><span class=\"glyphicon glyphicon-minus-sign pull-right\" style=\"color:red\">请先停止服务</span>{0}</a>".format(serviceId);
+		}
+		else {
+			item = "<a href=\"#\"  onclick=\"showRemoveMonitorServiceConfirmDlg('{0}','{1}')\" class=\"list-group-item\" data-toggle=\"modal\" data-target=\"#removeConfirm\"><span class=\"glyphicon glyphicon-minus-sign pull-right\" style=\"color:red\"></span>{2}</a>".format(ip, serviceId, serviceId);
+		}
 		items += item;
 	})
 	$("#removeSvcList").html(items);
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
 }
 
 function showRemoveMonitorServiceConfirmDlg(ip, serviceId) {
@@ -66,6 +107,8 @@ function loadRemoveMonitorServiceList() {
 		items += item;
 	});
 	$("#removeMonitorServiceList").html(items);
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
 }
 
 function updateBin() {
@@ -218,4 +261,6 @@ function loadModService() {
 		}
 		$(li).attr("class", "active");
 	});
+	$('#monitorLog').hide();
+	$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.8));
 }
