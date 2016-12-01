@@ -17,13 +17,21 @@ img{ border:none;}
     /*padding: 0px;*/
 /*}*/
 
-/*#sidebar > ul > li.active > a {*/
-	/*background-image: url("../images/menu-active.png");*/
-	/*background-repeat: no-repeat;*/
-	/*background-position: right center;*/
-	/*background-color:#e7f1f7;*/
-	/*text-decoration:none;*/
-/*}*/
+#sidebar > ul > li.active > a {
+	background-image: url("../images/menu-active.png");
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-color:#e7f1f7;
+	text-decoration:none;
+}
+
+#modServiceSidebar > ul > li.active > a{
+	background-image: url("../images/menu-active.png");
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-color:#e7f1f7;
+	text-decoration:none;
+}
 
 /*系统首页*/
 .fs12{ margin-left:60%;font-size:12px;}

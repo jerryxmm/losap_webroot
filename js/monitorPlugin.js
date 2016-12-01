@@ -24,21 +24,17 @@
         // console.log($(element));
         // console.log(options);
         this.init();
-       // g_intance.stopUpdateUI();
+        g_intance.stopUpdateUI();
     };
     nodeGroup.prototype.init = function () {
         var data = this.options.data;
+        this.initServerHead("");
         var sideBarHtml = "<ul class='nav nav-list'>";
         for(var i = 0; i < data.length; i++)
         {
             var serverNode = data[i];
-            this.initServerHead(serverNode.desc);
             this.initServerHomeView(serverNode);
             sideBarHtml += this.initTreeMenu(serverNode);
-            if (g_curIp == serverNode.desc)
-            {
-                
-            }
         }
         sideBarHtml += "</ul>";
         var sideBar = this.options.sideBar;
@@ -51,8 +47,7 @@
         var hideStr = "";
         if (serverNode.sideBarHide)
             hideStr = "style='display:none'";
-        var svrLst = " <li class='submenu' isSpan='true'> <a href='#' onclick='clickSubmenu(\"{2}\")'> <span>{0}</span> <span class='label label-important'>{1}</span></a>".format(serverNode.desc, records.length, serverNode.ip) +
-            "<ul id='{1}' class='nav nav-list' {0}>".format(hideStr, serverNode.ip);
+        var svrLst = "";
         var color;
         var curRecord;
         var icon;
@@ -78,14 +73,14 @@
                 alertFlag = "";
             }
             var isActive="";
-            if (g_curServiceId == curRecord.svc_name && g_curIp == serverNode.ip)
+            if ($('#serviceName').text() == curRecord.svc_name)
             {
                 isActive = "active";
             }
             var svc =  "<li class='{4}'><a class='list-group-item' href='#monitorTab' data-toggle='tab' onclick='showSvcPage(\"{5}\", \"{6}\")'><span class='glyphicon {0}' style='color:{1}'></span>{2} {3}</a></li>"
             .format(icon, color, curRecord.svc_name, alertFlag, isActive, serverNode.ip, curRecord.svc_name);
             svrLst += svc;
-            if (curRecord.svc_name== g_curSvc)
+            if (curRecord.svc_name== $('#serviceName').text())
             {
                 if (curRecord.status_run == 1) //当前为启动状态，点击后停止服务
                 {
@@ -99,8 +94,6 @@
                 }
             }
         }
-        svrLst +=   "</ul>" +
-                "</li>";
         return svrLst;
     }
 
@@ -131,7 +124,7 @@
             }
             var node = "<div id='{0}' class='{1}'>".format("nodeCode" + i, nodeWidthClass) +
                     "<div class = '{0}'>".format(svcStyle) +
-                "<a href='{0}' data-toggle='tab' onclick='showSvcPage(\"{3}\", \"{4}\")'>{1}</a><span class='r tc'><img src='{2}' ></span>".format(this.options.tabShow, data[i].svc_name, image, serverNode.ip, data[i].svc_name) +
+                "<a href='{0}' data-toggle='tab' data-toggle='tooltip' title='{5}' onclick='showSvcPage(\"{3}\", \"{4}\")'>{1}</a><span class='r tc'><img src='{2}' ></span>".format(this.options.tabShow, data[i].svc_name, image, serverNode.ip, data[i].svc_name, serverNode.ip) +
                     "<div class='row jkjd_yj'>" +
                     "<div class='col-lg-3 col-md-3'><span class='glyphicon glyphicon-user' style='color:{1}'>{0}</span></div>".format(data[i].online_client, userColor) +
                     "<div class='col-lg-9 col-md-9'>" +

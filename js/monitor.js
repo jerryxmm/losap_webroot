@@ -4,30 +4,17 @@
 var g_curSvc = "";
 var g_maxLogNum = 2000;
 //设置用户名
-function setLoginUser()
-{
-	var xmlhttp = sendRequest("/action/getLoginUser", 'GET',  "application/x-www-form-urlencoded", "");
-	xmlhttp.onreadystatechange=function()
-	  {
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-	   	{
-		 //举个例子,如果结果是1代表登录成功跳转到index.html，并保存用户名否则提示登录失败消息
-		  var user=xmlhttp.responseText;
-            var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + user;
-		  $('#loginUserName').html(user);
-	    }
-	  }
-}
 
-function Server(desc, ip, port, isForeigner)
+function Server(desc, ip, port, isForeigner, cipher, user)
 {
 	this.desc = desc;
 	this.ip = ip;
 	this.port = port;
 	var mySelf = this;
 	var myIP = ip;
-	var foreignerFlag = isForeigner;
-	var svcStatu = new Map();
+	this.foreignerFlag = isForeigner;
+	this.serviceMap = new Map();
+	this.monitorService = [];
 	this.serverInfo = {};
 	var localStateUrl = "/action/getstate";
 	var localMonitorUrl = "/action/actionMonitor";
@@ -35,12 +22,14 @@ function Server(desc, ip, port, isForeigner)
 	var freshStateFlag = true;
 	var freshInfoFlag = true;
 	var freshLogFlag = true;
-	this.cipher = "";
-	this.foreignerLst = [];
+	this.cipher = cipher;
+	this.monitorConfig = "";
 	this.sideBarHide = false;
+	this.userName = user;
+	this.password = "";
 
 	this.serverRequest = function(func, para, callback) {
-		if (foreignerFlag == false){
+		if (this.foreignerFlag == false){
 			getMonitorData(localStateUrl,func, '1.0', para, callback);
 		}
 		else{
@@ -48,64 +37,24 @@ function Server(desc, ip, port, isForeigner)
 			getMonitorData(foreignerUrl, func, '1.0', para, callback);
 		}
 	}
-	function refreshCurSvc(curObj) {
-		if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
-		{
-			$("#startIcon").css({"color":"#BEBFC0"});
-			$("#stopIcon").css({"color":"red"});
-		}
-		else //当前为服务停止状态，点击后启动服务
-		{
-			$("#startIcon").css({"color":"green"});
-			$("#stopIcon").css({"color":"#BEBFC0"});
-		}
-	}
 
 	function dealListSvc(data) {
 		var obj = JSON.parse(data);
 		var records = obj.records;
-		if (g_curIp == myIP)
-		{
-			for(var i = 0 ; i < records.length; i++) {
-				svcStatu.set(records[i].svc_name, records[i]);
-				if (records[i].svc_name == g_curServiceId){
-					refreshCurSvc(records[i]);
-				}
-			}
-		}else{
-			for(var i = 0 ; i < records.length; i++) {
-				svcStatu.set(records[i].svc_name, records[i]);
-			}
+		for(var i = 0 ; i < records.length; i++) {
+			mySelf.serviceMap.set(records[i].svc_name, records[i]);
 		}
-		freshStateFlag = true;
 	}
 
-	this.getSvcState = function() {
-		if (Boolean(freshStateFlag))
-		{
-			var para = {};
-			this.serverRequest("ListSvc", para, dealListSvc);
-			freshStateFlag = false;
-		}
+	this.getAllService = function() {
+		var para = {};
+		this.serverRequest("ListSvc", para, dealListSvc);
 	}
 
 	function dealServerInfo(data) {
 		freshInfoFlag = true;
 		var obj = JSON.parse(data);
 		this.serverInfo = obj;
-		if (foreignerFlag != false) {
-			return;
-		}
-		document.getElementById ("cpu").innerHTML = obj.CPU + "%";
-		document.getElementById("memery").innerHTML = obj.MemUsedPercent + "%";
-		var memUsed = (obj.MemTotal - obj.MemFree)/1024;
-		var memTotal = obj.MemTotal/1024;
-		document.getElementById("memInfo").innerHTML  = memUsed.toFixed(0) + "M/" + memTotal.toFixed(0)+ "M";
-		var diskUsed = obj.DiskTotal - obj.DiskFree;
-		var percent = diskUsed/obj.DiskTotal *100;
-		document.getElementById("diskUsed").innerHTML = percent.toFixed(2) + "%";
-		document.getElementById("diskInfo").innerHTML  = diskUsed.toString() + "G/" + obj.DiskTotal.toString() + "G";
-		document.getElementById("netSpeed").innerHTML  = "UP:" + obj.UpSpeed.toFixed(3)+ "MB/s "+ "Down:"+ obj.DownSpeed.toFixed(3) + "MB/s";
 	}
 	this.getServerInfo =  function() {
 		if (freshInfoFlag == true) {
@@ -165,23 +114,44 @@ function Server(desc, ip, port, isForeigner)
 	this.getLog = function () {
 		if (Boolean(freshLogFlag))
 		{
-			var para = {file_location:logFileLocation};
+			var para = {service_id: this.monitorService, file_location:logFileLocation};
 			this.serverRequest("ListSvcLog", para, dealListSvcLog);
 			freshLogFlag = false;
 		}
-	}
+	};
+
+	function dealGetMonitorServiceStatu(data) {
+		var obj = JSON.parse(data);
+		var records = obj.records;
+		for(var i = 0 ; i < records.length; i++) {
+			mySelf.serviceMap.set(records[i].svc_name, records[i]);
+			var curServiceId = $('#serviceName').text();
+			if (records[i].svc_name == curServiceId)
+			{
+				refreshCurSvc(records[i]);
+			}
+		}
+		freshStateFlag = true;
+	};
+
+	this.getMonitorServiceStatu = function () {
+		if (Boolean(freshStateFlag))
+		{
+			var para = {service_id: this.monitorService};
+			this.serverRequest("ListSvc", para, dealGetMonitorServiceStatu);
+			freshStateFlag = false;
+		}
+	};
+	
 	var updateLag = 3000;
 	var serverInfoTimer = 0;
 	var svcStatuTimer = 0;
 	var logTimer = 0;
 	this.startMonitor = function () {
-		this.getServerInfo();
-		this.getSvcState();
-		this.getLog();
-		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getServerInfo()".format(this.ip),updateLag);
-		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getSvcState()".format(this.ip),updateLag);
+		 //serverInfoTimer = setInterval("g_intance.getServer('{0}').getServerInfo()".format(this.ip),updateLag);
+		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getMonitorServiceStatu()".format(this.ip),updateLag);
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getLog()".format(this.ip),updateLag);
-	}
+	};
 
 	this.stopMonitor = function () {
 		clearInterval(serverInfoTimer);
@@ -190,7 +160,7 @@ function Server(desc, ip, port, isForeigner)
 	}
 
 	this.startSvc = function (curSvc) {
-		var curObj = svcStatu.get(curSvc);
+		var curObj = this.serviceMap.get(curSvc);
 		var para = {service_id:curSvc};
 		if (curObj.status_run == 1){
 			alert("当前服务已经启动");
@@ -201,7 +171,7 @@ function Server(desc, ip, port, isForeigner)
 	}
 
 	this.stopSvc = function (curSvc) {
-		var curObj = svcStatu.get(curSvc);
+		var curObj = this.serviceMap.get(curSvc);
 		var para = {service_id:curSvc};
 		if (curObj.status_run == 1) {
 			this.serverRequest("ExecCmdStop", para, "NULL");
@@ -214,14 +184,10 @@ function Server(desc, ip, port, isForeigner)
 	function dealRemoveService(response) {
 		var rsp = JSON.parse(response);
 		var code = parseInt(rsp.code);
-		if (code == 0)
-		{
-			$('#TipContent').text("服务删除成功！");
-			$('#TipDlg').modal('show');
-		}
-		else{
-			$('#TipContent').text("服务删除失败！");
-			$('#TipDlg').modal('show');
+		if (code == 0) {
+			showTip("服务删除成功！");
+		} else{
+			showTip("服务删除失败！");
 		}
 	}
 	this.removeSvc = function (curSvc) {
@@ -232,11 +198,11 @@ function Server(desc, ip, port, isForeigner)
 	function dealGetForeignServer(data) {
 		var obj = JSON.parse(data);
 		if (obj.content != undefined){
-			mySelf.foreignerLst = JSON.parse(obj.content);
+			mySelf.monitorConfig = obj.content;
 		}
 	}
 	this.getFromServer = function () {
-		var req = new Request("1.0", "GetForeignServer", {fileName:"foreignServer.json"});
+		var req = new Request("1.0", "GetForeignServer", {fileName:"{0}_monitorService.json".format(this.userName)});
 		$.ajax({
 			url:localMonitorUrl,
 			data: JSON.stringify(req),
@@ -247,30 +213,9 @@ function Server(desc, ip, port, isForeigner)
 	};
 
 	this.saveToServer = function (content) {
-		var para = {fileName:"foreignServer.json", content:content};
+		var para = {fileName:"{0}_monitorService.json".format(this.userName), content:content};
 		this.serverRequest("SaveForeignServer", para, "NULL");
 	};
-
-	this.addForeignerToServer = function (cipher, ip, port, desc) {
-		var fore = {cipher:cipher, ip:ip, port:port, desc:desc};
-		this.foreignerLst.push(fore);
-		this.saveToServer(JSON.stringify(this.foreignerLst));
-	};
-
-	this.removeForeigner = function (ip) {
-		for(var i = 0; i < this.foreignerLst.length; i++)
-		{
-			if (this.foreignerLst[i].ip == ip){
-				this.foreignerLst.splice(i, 1);
-				break;
-			}
-		}
-		this.saveToServer(JSON.stringify(this.foreignerLst));
-		$('#TipContent').text("服务器节点删除成功！");
-		$('#TipDlg').modal('show');
-	}
-
-
 	function ShowListSvcItem(str, serviceId)
 	{
 		  var obj = JSON.parse(str);
@@ -346,7 +291,7 @@ function Server(desc, ip, port, isForeigner)
 		$('#monitorObject').empty();
 		$('#table').bootstrapTable('destroy');
 
-		var curObj = svcStatu.get(serviceId);
+		var curObj = this.serviceMap.get(serviceId);
 		var serviceInfo = "版本号：{0}  启动时间：{1}".format(curObj.version, curObj.uptime);
 		$('#serviceInfo').text(serviceInfo);
 		$('#serviceName').text(serviceId);
@@ -365,26 +310,41 @@ function Server(desc, ip, port, isForeigner)
 	}
 
 	this.init = function init() {
-		this.getFromServer();
+		this.getAllService();
+		if (mySelf.foreignerFlag == false) {
+			this.getFromServer();
+		}
 	}
 
+	function hasInclude(arr, serviceId) {
+		if (arr == undefined)
+			return -1;
+		for(var i = 0; i < arr.length; i++){
+			if (arr[i] == serviceId)
+				return 1;
+		}
+		return -1;
+	}
+	
 	this.getSvcStatus = function () {
 		var desc = "";
-		if (foreignerFlag == false) {
+		if (this.foreignerFlag == false) {
 			desc = "本机";
 		}else
 		{
 			desc = this.desc;
 		}
 		var svcLst = [];
-		svcStatu.forEach(function (value, key) {
-			svcLst.push(value);
+		this.serviceMap.forEach(function(value, key) {
+			if (hasInclude(mySelf.monitorService, key) != -1){
+				svcLst.push(value);
+			}
 		});
 		return {desc:desc, sideBarHide:this.sideBarHide, ip:this.ip, svcLst:svcLst};
 	};
 
 	this.getSvc = function (serviceId) {
-		return svcStatu.get(serviceId);
+		return this.serviceMap.get(serviceId);
 	};
 
 	var debugTimerId;
@@ -393,8 +353,7 @@ function Server(desc, ip, port, isForeigner)
 	var debugServiceId;
 	var debugPackets = new Map();
 
-	function showDebugModal(fileLocation) {
-		$('#debugModalBody').treeview("destory");
+	this.showDebugModal = function(fileLocation) {
 		var packet = debugPackets.get(parseInt(fileLocation));
 		var nodeReq = {text: '请求', nodes:[]};
 		$.each(packet.Req, function (name, value) {
@@ -416,13 +375,10 @@ function Server(desc, ip, port, isForeigner)
 			nodeRsp.nodes.push(node);
 		}
 		var tree =[nodeReq, nodeRsp];
-		$('#debugModalBody').treeview({
-			data:tree
-		});
+		return tree;
 	}
 
 	function showDebugInfo(data) {
-		console.log(data);
 		var obj = JSON.parse(data);
 		debugFileLocation = obj.file_location;
 		continueGetDebug == true;
@@ -434,12 +390,12 @@ function Server(desc, ip, port, isForeigner)
 			var packet = packets[i];
 			debugPackets.set(packet.fileLocation, packet);
 			var pak = debugPackets.get(packet.fileLocation);
-			var li = "<li class=\"list-group-item list-group-item-danger\"><a herf='#' onclick=\"showDebugModal('{0}')\" data-toggle='modal' data-target='#debugModal'>PacketID:{1}</a></li>".format(packet.fileLocation, packet.fileLocation);
+			var li = "<li class=\"list-group-item list-group-item-danger\"><a herf='#' onclick=\"showDebugModal('{0}', '{1}')\" data-toggle='modal' data-target='#debugModal'>PacketID:{2}</a></li>".format(mySelf.ip, packet.fileLocation, packet.fileLocation);
 			$('#debugArea').append(li);
 		}
 	}
 
-	function getDebugInfo() {
+	this.getDebugInfo = function() {
 		if (continueGetDebug == false)
 			return;
 		continueGetDebug == false;
@@ -454,7 +410,8 @@ function Server(desc, ip, port, isForeigner)
 		$("#debugTab").attr("href", "#debugPage");
 		$("#debugTab").attr("isDebug", "on");
 		$("#onlineDebug").css({"color":"green"});
-		debugTimerId = setInterval("getDebugInfo()",g_updateLag);
+		$('#debugArea').empty();
+		debugTimerId = setInterval("g_intance.getServer('{0}').getDebugInfo()".format(this.ip),updateLag);
 	};
 
 	this.closeDebugFunc = function(serviceId) {
@@ -463,6 +420,7 @@ function Server(desc, ip, port, isForeigner)
 		$("#debugTab").attr("href", "#svcPage");
 		$("#debugTab").attr("isDebug", "off");
 		$("#onlineDebug").css({"color":"#BEBFC0"});
+		$('#debugArea').empty();
 		clearInterval(debugTimerId);
 	};
 
@@ -552,15 +510,101 @@ function Server(desc, ip, port, isForeigner)
 	this.init();
 };
 
-function clickSubmenu(ip)
-{
-	var server = g_intance.getServer(ip);
-	var js = document.getElementById(ip);
-	if (server.sideBarHide){
-		$(js).slideDown();
-		server.sideBarHide = false;
-	}else{
-		$(js).slideUp();
-		server.sideBarHide = true;
+
+function Manager(user) {
+	this.updataLag = 3000;
+	this.serverMap = new Map();
+	this.foreignIp = "";
+	this.foreignPort = '';
+	this.foreignDesc = '';
+	this.service_id = "";
+	this.serviceMap = new Map();
+	this.user = user;
+	this.init(user);
+};
+
+Manager.prototype.showHomePage = function () {
+	$("#svcView").testPlugin('destroy');
+	$("#svcView").empty();
+	var serverLst = [];
+	this.serverMap.forEach(function (value, key) {
+		var item = value.getSvcStatus();
+		serverLst.push(item);
+	});
+	$('#svcView').testPlugin(
+		{
+			data:serverLst
+		}
+	);
+};
+
+Manager.prototype.init = function (user) {
+	var localIP = window.location.host.split(':')[0];
+	var local = new Server('本机',localIP, window.location.port, false, "", user);
+	this.localServer = local;
+	if (local.monitorConfig != "")
+	{
+		var moniConf = JSON.parse(local.monitorConfig);
+		var monitor = moniConf.monitor;
+		for(var i = 0; i < monitor.length; i++)
+		{
+			var serverConf = monitor[i];
+			var server;
+			if (serverConf.ip == localIP){
+				server = local;
+			}else{
+				server = new Server(serverConf.desc, serverConf.ip, serverConf.port, true, serverConf.cipher, serverConf.user);
+			}
+			server.monitorService = serverConf.monitor_service;
+			server.startMonitor();
+			this.serverMap.set(serverConf.ip, server);
+			for(var k = 0; k < server.monitorService.length; k++)
+			{
+				this.serviceMap.set(server.monitorService[k], server.ip);
+			}
+
+		}
 	}
+	this.updateUI();
+};
+
+Manager.prototype.getServer = function (ipOrDesc) {
+	var server = this.serverMap.get(ipOrDesc);
+	if (server == undefined)
+	{
+		for (var value of this.serverMap.values()) {
+			if (value.desc == ipOrDesc){
+				server = value;
+				break;
+			}
+		}
+	}
+	return server;
+};
+
+Manager.prototype.updateUI = function () {
+	//this.showHomePage();
+	this.updateUiTimer = setInterval("g_intance.showHomePage()", this.updataLag);
+};
+
+Manager.prototype.stopUpdateUI = function () {
+	clearInterval(this.updateUiTimer);
 }
+
+Manager.prototype.getSvc = function (ip, serviceId) {
+	var server = this.serverMap.get(ip);
+	return server.getSvc(serviceId);
+}
+
+// function clickSubmenu(ip)
+// {
+// 	var server = g_intance.getServer(ip);
+// 	var js = document.getElementById(ip);
+// 	if (server.sideBarHide){
+// 		$(js).slideDown();
+// 		server.sideBarHide = false;
+// 	}else{
+// 		$(js).slideUp();
+// 		server.sideBarHide = true;
+// 	}
+// }

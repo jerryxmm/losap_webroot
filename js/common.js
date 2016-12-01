@@ -168,6 +168,24 @@ function parseJsonToTable(str)
       return table;
 }
 
+function showTip(mess) {
+	$('#TipContent').text(mess);
+	$('#TipDlg').modal('show');
+}
+
+function refreshCurSvc(curObj) {
+    if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
+    {
+        $("#startIcon").css({"color":"#BEBFC0"});
+        $("#stopIcon").css({"color":"red"});
+    }
+    else //当前为服务停止状态，点击后启动服务
+    {
+        $("#startIcon").css({"color":"green"});
+        $("#stopIcon").css({"color":"#BEBFC0"});
+    }
+}
+
 function GetMonitorFile(filePath)
 {
     param.file_name = filePath;

@@ -52,5 +52,13 @@ function startDebug() {
 	}
 }
 
+function showDebugModal(ip, fileLocation) {
+	var server = g_intance.getServer(ip);
+	var treeData = server.showDebugModal(fileLocation);
+	$('#debugModalBody').treeview({
+		data:treeData
+	});
+}
+
 
 
