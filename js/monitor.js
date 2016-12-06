@@ -50,10 +50,9 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	var freshLogFlag = true;
 	this.cipher = cipher;
 	this.monitorConfig = "";
-	this.sideBarHide = false;
 	this.userName = user;
 	this.password = "";
-
+	this.alive = false;
 	this.serverRequest = function(func, para, callback, async=true) {
 		var url = "";
 		if (this.foreignerFlag == false){
@@ -70,9 +69,50 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			data: postStr,
 			async:async,
 			type:"POST",
-			success :callback
+			success :function(response){
+				mySelf.alive = true;
+				callback(response);
+			},
+			error: function() {
+				mySelf.alive = false;
+			}
 		});
 	};
+
+	this.netPing = function () {
+		var url = "";
+		if (this.foreignerFlag == false){
+			url = localStateUrl;
+		}
+		else{
+			url = foreignerUrl;
+		}
+		$.ajax({
+			type: "POST",
+			cache: false,
+			url: url,
+			async:false,
+			data: "",
+			success: function() {
+				mySelf.alive = true;
+			},
+			error: function() {
+				mySelf.alive = false;
+			}
+		});
+	};
+
+	this.tryHeartBeat = function () {
+		this.netPing();
+		if (this.alive == true){
+			this.startMonitor();
+			clearInterval(this.heartBeatTimer);
+		}
+	}
+
+	this.startHeartBeatTimer = function () {
+		this.heartBeatTimer = serverInfoTimer = setInterval("g_intance.getServer('{0}').tryHeartBeat()".format(this.ip),6000);
+	}
 
 	function dealListSvc(data) {
 		var obj = JSON.parse(data);
@@ -92,6 +132,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		freshInfoFlag = true;
 		var obj = JSON.parse(data);
 		mySelf.serverInfo = obj;
+		this.alive = true;
 	}
 	this.getServerInfo =  function() {
 		if (freshInfoFlag == true) {
@@ -101,6 +142,11 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		}
 	}
 
+	this.resetTimer = function () {
+		freshInfoFlag = true;
+		freshLogFlag = true;
+		freshStateFlag = true;
+	}
 	var logFileLocation = {};
 
 	function dealListSvcLog(data) {
@@ -186,6 +232,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		this.getMonitorServiceStatu();
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getServerInfo()".format(this.ip),updateLag);
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getMonitorServiceStatu()".format(this.ip),updateLag);
+		console.log("startTimer" + this.ip);
 		 serverInfoTimer = setInterval("g_intance.getServer('{0}').getLog()".format(this.ip),updateLag);
 	};
 
@@ -381,7 +428,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 				svcLst.push(value);
 			}
 		});
-		return {desc:desc, sideBarHide:this.sideBarHide, ip:this.ip, perform:this.serverInfo, svcLst:svcLst};
+		return {desc:desc, ip:this.ip,alive:this.alive, perform:this.serverInfo, svcLst:svcLst};
 	};
 
 	this.getSvc = function (serviceId) {
@@ -563,9 +610,15 @@ Manager.prototype.showHomePage = function () {
 	$("#svcView").testPlugin('destroy');
 	$("#svcView").empty();
 	var serverLst = [];
-	this.serverMap.forEach(function (value, key) {
-		var item = value.getSvcStatus();
+	this.serverMap.forEach(function (server, ip) {
+		var item = server.getSvcStatus();
 		serverLst.push(item);
+		// if (Boolean(server.alive)){
+		// 	var item = server.getSvcStatus();
+		// 	serverLst.push(item);
+		// }else{
+		// 	//server.resetTimer();
+		// }
 	});
 	$('#svcView').testPlugin(
 		{
@@ -592,7 +645,12 @@ Manager.prototype.init = function (user) {
 				server = new Server(serverConf.desc, serverConf.ip, serverConf.port, true, serverConf.cipher, serverConf.user);
 			}
 			server.monitorService = serverConf.monitor_service;
-			server.startMonitor();
+			server.netPing();
+			if (Boolean(server.alive)){
+				server.startMonitor();
+			}else{
+				server.startHeartBeatTimer();
+			}
 			this.serverMap.set(serverConf.ip, server);
 			for(var k = 0; k < server.monitorService.length; k++)
 			{

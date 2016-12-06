@@ -41,8 +41,13 @@ img{ border:none;}
 .jkjd_fwname a{ width:100%; line-height:34px; cursor:pointer; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow: ellipsis;background-color: #90C083;}
 .red{ color:#ff2400;}
 
-.perform{
+.perform_alive{
 	background-color:#52b6e3;
+	min-height: 90px;
+}
+
+.perform_dead{
+	background-color: gray;
 	min-height: 90px;
 }
 
@@ -52,7 +57,7 @@ img{ border:none;}
 	color: white;
 }
 
-.perform img{
+.perform_alive img{
 	 margin-top:20px;
 	float: left;
 }
@@ -73,12 +78,15 @@ img{ border:none;}
 	padding-bottom: 30px;
 }
 
-.active_svc{width: 90%; height:130px; background-color:#90C083; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
-.active_svc a{margin-left:12px; font-size:14px;color:white}
-.active_svc span img{ margin:12px 12px 0px 0px;}
+.svc_normal{width: 90%; height:130px; background-color:#90C083; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.svc_normal a{margin-left:12px; font-size:14px;color:white}
+.svc_normal span img{ margin:12px 12px 0px 0px;}
 
-.inactive_svc{width: 90%; height:130px; background-color:#AE4141; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
-.inactive_svc a{margin-left:12px; font-size:14px;color:white}
+.svc_alter{width: 90%; height:130px; background-color:#AE4141; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.svc_alter a{margin-left:12px; font-size:14px;color:white}
+
+.svc_disconnect{width: 90%; height:130px; background-color:gray; border:1px solid #ddd; border-radius:5px; box-shadow:0px 0px 2px #ddd; margin-bottom:20px;}
+.svc_disconnect a{margin-left:12px; font-size:14px;color:white}
 
 .jkjd_fwname{ margin-right:30px; padding-left:15px;}
 .jkjd_fwname a:hover{ color:#52b6e3;}

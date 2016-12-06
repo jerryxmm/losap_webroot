@@ -32,12 +32,12 @@ $(function(){
 });
 
 function doOnResize() {
-	var hg = Math.round(document.documentElement.clientHeight*0.3);
+	var hg = Math.round(document.documentElement.clientHeight*0.25);
 	$('#logDiv').height(hg);
 	if($("#logDiv").is(":hidden")){
 		Math.round(document.documentElement.clientHeight*0.8)
 	}else{
-		$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.55));
+		$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.6));
 	}
 }
 

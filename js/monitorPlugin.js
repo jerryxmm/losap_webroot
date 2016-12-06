@@ -105,14 +105,17 @@
     };
 
     nodeGroup.prototype.initServerPerform = function (serverNode) {
-      var perform = serverNode.perform;
-        if (perform.CPU == undefined){
-            return "";
+        var theme = "perform_alive";
+        if (serverNode.alive == false)
+        {
+            serverNode.ip = serverNode.ip + "服务器未启动";
+            theme = "perform_dead";
         }
+        var perform = serverNode.perform;
         var up = (perform.UpSpeed*1000).toFixed(0);
         var down = (perform.DownSpeed*1000).toFixed(0);
-      var tmp = "<div class='col-lg-3 col-md-4'>"+
-                    "<div class='perform'>"+
+        var tmp = "<div class='col-lg-3 col-md-4'>"+
+                    "<div class='{0}'>".format(theme)+
                         "<div class='col-lg-2 col-md-2'>" +
                             "<img src='images/jdtj_pic.png' />" +
                         "</div>"+
@@ -142,15 +145,23 @@
         var svcStyle = "";
         for(var i = 0; i < data.length; i++)
         {
-            if (data[i].status_run == 1)
+            if (data[i].status_run == 1 && data[i].status_alert == 0)
             {
                 userColor = "#90C083";
-                svcStyle = "active_svc";
+                svcStyle = "svc_normal";
             }
-            else
+            else if (data[i].status_run == 1 && data[i].status_alert == 1)
             {
                 userColor = "#AE4141";
-                svcStyle = "inactive_svc";
+                svcStyle = "svc_alter";
+            }else{
+                userColor = "gray";
+                svcStyle = "svc_disconnect";
+            }
+
+            if (serverNode.alive == false){
+                userColor = "gray";
+                svcStyle = "svc_disconnect";
             }
             var node = "<div id='{0}' class='{1}'>".format("nodeCode" + i, nodeWidthClass) +
                     "<div class = '{0}'>".format(svcStyle) +
