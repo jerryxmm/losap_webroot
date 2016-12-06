@@ -85,46 +85,21 @@ var Request = function(ver, fun, para)
 
 function sendRequest(url, method, type, req)
 {
-    var xmlhttp;  
-    if (window.XMLHttpRequest)  
-      {// code for IE7+, Firefox, Chrome, Opera, Safari  
-      xmlhttp=new XMLHttpRequest();  
-      }  
-    else  
-      {// code for IE6, IE5  
-      xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");  
-      } 
-    xmlhttp.open(method,url,true);  
+    var xmlhttp;
+    if (window.XMLHttpRequest)
+      {// code for IE7+, Firefox, Chrome, Opera, Safari
+      xmlhttp=new XMLHttpRequest();
+      }
+    else
+      {// code for IE6, IE5
+      xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+    xmlhttp.open(method,url,true);
     xmlhttp.setRequestHeader("Content-Type",type);
-    xmlhttp.send(req);  
+    xmlhttp.send(req);
     return xmlhttp;
 }
 
-function getMonitorData(url, monitorItem, version, param, dealDataFunc)
-{
-    var req = new Request(version, monitorItem, param); 
-    var postStr = JSON.stringify(req);
-    //console.log(postStr);
-    var xmlhttp = sendRequest(url, 'POST',  "application/x-www-form-urlencoded", postStr);
-    xmlhttp.onreadystatechange=function()  
-    {  
-      if (xmlhttp.readyState==4 && (xmlhttp.status==200 || xmlhttp.status==302)){
-                //console.log(xmlhttp.responseText);
-                var response = xmlhttp.responseText;
-                if (typeof(dealDataFunc) == 'function')
-                {
-                    if (dealDataFunc.length == 2)
-                    {
-                        dealDataFunc(response, param.service_id);   
-                    }
-                    else
-                    {
-                        dealDataFunc(response); 
-                    }        
-                }   
-        }
-    }
-}
 
 function parseJsonToTable(str)
 {
@@ -173,19 +148,6 @@ function showTip(mess) {
 	$('#TipDlg').modal('show');
 }
 
-function refreshCurSvc(curObj) {
-    if (curObj.status_run == 1) //当前为启动状态，点击后停止服务
-    {
-        $("#startIcon").css({"color":"#BEBFC0"});
-        $("#stopIcon").css({"color":"red"});
-    }
-    else //当前为服务停止状态，点击后启动服务
-    {
-        $("#startIcon").css({"color":"green"});
-        $("#stopIcon").css({"color":"#BEBFC0"});
-    }
-}
-
 function GetMonitorFile(filePath)
 {
     param.file_name = filePath;
@@ -219,4 +181,41 @@ function GetMonitorFile(filePath)
             });
         }
     }
+};
+
+function EventTarget() {
+    this.handlers = {};
 }
+EventTarget.prototype = {
+    constructor:EventTarget,
+    addHandle:function (type, handler) {
+        if (typeof this.handlers[type]=='undefined'){
+            this.handlers[type] = new Array();
+        }
+        this.handlers[type].push(handler);
+    },
+    removeHandler:function (type, handler) {
+        if(this.handlers[type] instanceof Array){
+            var handlers = this.handlers[type];
+            for(var i = 0; i < handlers.length; i++){
+                if (handlers[i] == handler){
+                    handlers.splice(i, 1);
+                    break;
+                }
+            }
+        }
+    },
+    trigger:function (event) {
+        if (!event.target){
+            event.target = this;
+        }
+        if (this.handlers[event.type] instanceof Array){
+            var handlers = this.handlers[event.type];
+            for(var i = 0; i <handlers.length; i++){
+                handlers[i](event);
+            }
+        }
+    }
+};
+
+var g_eventTarget = new EventTarget();

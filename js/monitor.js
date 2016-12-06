@@ -5,6 +5,7 @@ var g_curSvc = "";
 var g_maxLogNum = 2000;
 //设置用户名
 var g_curLogLevel = "all";
+
 function doShowLog(type) {
 	if (type == 'all'){
 		$('#logArea > .list-group-item').show();
@@ -53,15 +54,25 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	this.userName = user;
 	this.password = "";
 
-	this.serverRequest = function(func, para, callback) {
+	this.serverRequest = function(func, para, callback, async=true) {
+		var url = "";
 		if (this.foreignerFlag == false){
-			getMonitorData(localStateUrl,func, '1.0', para, callback);
+			url = localStateUrl;
 		}
 		else{
+			url = foreignerUrl;
 			para['cipher'] = this.cipher;
-			getMonitorData(foreignerUrl, func, '1.0', para, callback);
 		}
-	}
+		var req = new Request("1.0", func, para);
+    	var postStr = JSON.stringify(req);
+			$.ajax({
+			url:url,
+			data: postStr,
+			async:async,
+			type:"POST",
+			success :callback
+		});
+	};
 
 	function dealListSvc(data) {
 		var obj = JSON.parse(data);
@@ -69,31 +80,18 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		for(var i = 0 ; i < records.length; i++) {
 			mySelf.serviceMap.set(records[i].svc_name, records[i]);
 		}
-	}
+	};
 
 	this.getAllService = function() {
-		var para = {cipher:this.cipher};
-		//this.serverRequest("ListSvc", para, dealListSvc);
-		var req = new Request("1.0", "ListSvc", para);
-		var url = "";
-		if (this.foreignerFlag){
-			url =foreignerUrl;
-		}else{
-			url = localMonitorUrl;
-		}
-		$.ajax({
-			url:url,
-			data: JSON.stringify(req),
-			async:false,
-			type:"POST",
-			success :dealListSvc
-		});
+		var para = {};
+		this.serverRequest("ListSvc", para, dealListSvc, false);
+		this.serverRequest("GetServerInfo", para, dealServerInfo, false);
 	}
 
 	function dealServerInfo(data) {
 		freshInfoFlag = true;
 		var obj = JSON.parse(data);
-		this.serverInfo = obj;
+		mySelf.serverInfo = obj;
 	}
 	this.getServerInfo =  function() {
 		if (freshInfoFlag == true) {
@@ -167,11 +165,6 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		var records = obj.records;
 		for(var i = 0 ; i < records.length; i++) {
 			mySelf.serviceMap.set(records[i].svc_name, records[i]);
-			var curServiceId = $('#serviceName').text();
-			if (records[i].svc_name == curServiceId)
-			{
-				refreshCurSvc(records[i]);
-			}
 		}
 		freshStateFlag = true;
 	};
@@ -209,20 +202,20 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			alert("当前服务已经启动");
 		}
 		else{ //当前为服务停止状态，点击后启动服务
-			this.serverRequest("ExecCmdStart", para, "NULL");
+			this.serverRequest("ExecCmdStart", para, "NULL",false);
 		}
-	}
+	};
 
 	this.stopSvc = function (curSvc) {
 		var curObj = this.serviceMap.get(curSvc);
 		var para = {service_id:curSvc};
 		if (curObj.status_run == 1) {
-			this.serverRequest("ExecCmdStop", para, "NULL");
+			this.serverRequest("ExecCmdStop", para, "NULL", false);
 		}
 		else {
 			alert("当前服务已经停止");
 		}
-	}
+	};
 
 	function dealRemoveService(response) {
 		var rsp = JSON.parse(response);
@@ -245,21 +238,16 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		}
 	}
 	this.getFromServer = function () {
-		var req = new Request("1.0", "GetForeignServer", {fileName:"{0}_monitorService.json".format(this.userName)});
-		$.ajax({
-			url:localMonitorUrl,
-			data: JSON.stringify(req),
-			async:false,
-			type:"POST",
-			success :dealGetForeignServer
-		});
+		this.serverRequest("GetForeignServer", {fileName:"{0}_monitorService.json".format(this.userName)},dealGetForeignServer, false);
 	};
 
 	this.saveToServer = function (content) {
 		var para = {fileName:"{0}_monitorService.json".format(this.userName), content:content};
 		this.serverRequest("SaveForeignServer", para, "NULL");
 	};
-	function ShowListSvcItem(str, serviceId)
+
+	var m_curServiceId = "";
+	function ShowListSvcItem(str)
 	{
 		  var obj = JSON.parse(str);
 		  var head = obj.metadata;
@@ -270,27 +258,31 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			  var rec = records[i];
 			  if ( rec.show == 1)
 			  {
-				  var monObj = "<li><a href=\"#\" onclick=\"ListSvcItemInfo('{0}','{1}','{2}')\">{3}</a></li>".format(myIP, serviceId, rec.id,rec.name);
+				  var monObj = "<li><a href='#' onclick=\"ListSvcItemInfo('{0}','{1}','{2}')\">{3}</a></li>".format(myIP, m_curServiceId, rec.id,rec.name);
 				 monObjs += monObj;
 			  }
 		  }
+		var curObj = mySelf.serviceMap.get(m_curServiceId);
+		if (curObj.online_debug == 1){
+			monObjs += "<li><a href='#' onclick='showDebug()'>在线调试</a></li>";
+		}
+		$('#monitorObject').empty();
 		  $('#monitorObject').html(monObjs);
 	}
 
 	this.listSvcItem =  function(serviceId)
 	{
+		m_curServiceId = serviceId;
 		var para = {service_id:serviceId};
-		this.serverRequest("ListSvcItem", para, ShowListSvcItem);
+		this.serverRequest("ListSvcItem", para, ShowListSvcItem, false);
 	};
 
 	 function ShowListSvcInfo(varData)
 	{
 		// var table = parseJsonToTable(varData);
 		 $('#table').bootstrapTable('destroy');
-
 		 var table = JSON.parse(varData);
-		  if (table.metadata == undefined)
-		  {
+		  if (table.metadata == undefined) {
 			return;
 		  }
 		  var metadata = table.metadata;
@@ -342,14 +334,20 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 		{
 			$("#startIcon").css({"color":"#BEBFC0"});
 			$("#stopIcon").css({"color":"red"});
+			$('#onlineDebugCheckBox').removeAttr("disabled");
+			if (curObj.online_debug == 1){
+				document.getElementById("onlineDebugCheckBox").checked=true;
+			}else{
+				document.getElementById("onlineDebugCheckBox").checked=false;
+			}
 		}
 		else //当前为服务停止状态，点击后启动服务
 		{
 			$("#startIcon").css({"color":"green"});
 			$("#stopIcon").css({"color":"#BEBFC0"});
+			$('#onlineDebugCheckBox').attr('disabled', 'true');
+			$('#onlineDebugCheckBox').removeAttr('checked');
 		}
-		$("#onlineDebug").css({"color":"#BEBFC0"});
-		$("#debugTab").attr("isDebug","off");
 	}
 
 	this.init = function init() {
@@ -383,7 +381,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 				svcLst.push(value);
 			}
 		});
-		return {desc:desc, sideBarHide:this.sideBarHide, ip:this.ip, svcLst:svcLst};
+		return {desc:desc, sideBarHide:this.sideBarHide, ip:this.ip, perform:this.serverInfo, svcLst:svcLst};
 	};
 
 	this.getSvc = function (serviceId) {
@@ -449,20 +447,16 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	this.openDebugFunc = function(serviceId){
 		debugServiceId = serviceId;
 		var para = {service_id:serviceId};
-		this.serverRequest("OpenSvcDebug", para, "NULL");
-		$("#debugTab").attr("href", "#debugPage");
-		$("#debugTab").attr("isDebug", "on");
-		$("#onlineDebug").css({"color":"green"});
+		console.log("openDebugFunc");
+		this.serverRequest("OpenSvcDebug", para, "NULL", false);
 		$('#debugArea').empty();
 		debugTimerId = setInterval("g_intance.getServer('{0}').getDebugInfo()".format(this.ip),updateLag);
 	};
 
 	this.closeDebugFunc = function(serviceId) {
 		var para = {service_id:serviceId};
-		this.serverRequest("CloseSvcDebug", para, "NULL");
-		$("#debugTab").attr("href", "#svcPage");
-		$("#debugTab").attr("isDebug", "off");
-		$("#onlineDebug").css({"color":"#BEBFC0"});
+		console.log("closeDebugFunc");
+		this.serverRequest("CloseSvcDebug", para, "NULL", false);
 		$('#debugArea').empty();
 		clearInterval(debugTimerId);
 	};
@@ -485,7 +479,6 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			for(var i = 0; i < atts.length; i++)
 			{
 				var att = atts[i];
-				console.log(att.name + "***"+att.nodeValue);
 				if (att.name == "ps") {
 					continue
 				}

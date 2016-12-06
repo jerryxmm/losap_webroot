@@ -22,7 +22,7 @@
         </div>
         <ul id = "myTab" class="nav navbar-nav nav-tabs navbar-right">
             <li class="active"><a href="#homePage" data-toggle="tab" onclick="doHomePage()"><span class="glyphicon glyphicon-home"></span> </a></li>
-            <li><a href="#monitorTab" data-toggle="tab"><span class="glyphicon glyphicon-eye-open"></span>  监控服务</a></li>
+            <li><a href="#monitorPage" data-toggle="tab" onclick="doMonitorPage()"><span class="glyphicon glyphicon-eye-open"></span>  监控服务</a></li>
             <li class="dropdown">
                 <a href="#" id = "maiatance" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span>   维护<b class="caret"> </b></a>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="maiatance">
@@ -32,7 +32,7 @@
                     <li><a href="#addServiceTab" data-toggle="tab" onclick="doAddServiceTab()"><span class="glyphicon glyphicon-plus"></span> 布署服务</a></li>
                     <li><a id ="removeSvc" href="#removeServiceTab" data-toggle="tab" onclick="loadRemoveServiceList()"><span class="glyphicon glyphicon-minus"></span> 删除布置服务</a></li>
                     <li><a href="#modServiceTab" data-toggle="tab" onclick="loadModService()"><span class="glyphicon glyphicon-pencil"></span> 修改服务配置</a></li>
-                    <li><a href="#updateBinTab" data-toggle="tab" onclick="doUpdateBinTab()">><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
+                    <li><a href="#updateBinTab" data-toggle="tab" onclick="doUpdateBinTab()"><span class="glyphicon glyphicon-flag"></span> 更新维护</a></li>
                 </ul>
             </li>
             <li><a href="/logout" ><span class="glyphicon glyphicon-log-out"></span>  登出</a></li>
@@ -43,23 +43,28 @@
 <div class="container-fluid" style="padding: 0px">
    <div id="mainBody" class=" tab-content">
         <div id = "homePage" class="tab-pane fade in active">
-            <div class="row jkjd_main">
-                <div class="col-lg-3 perform">
-                    <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">CPU</span><span id="cpu" class="fs20 tr">30 %</span></div>
+            <div id="serverPerform" class="row jkjd_main">
+                <div class="col-lg-3 col-md-4">
+                    <div class="perform">
+                        <div class="col-lg-2 col-md-2">
+                            <img src="images/jdtj_pic.png" />
+                        </div>
+                        <div class="col-lg-10 col-md-10">
+                            <div class=" serverName">
+                               <span class="performItem">ip:192.168.60.142 </span>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3"><span class="performItem">CPU:30%</span></div>
+                                <div class="col-lg-9 col-md-9"> <span class="performItem">磁盘:Used:30%, Free:70% </span></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3"> <span class="performItem">Mem:30% </span></div>
+                                <div class="col-lg-9 col-md-9"> <span class="performItem"> 网速:Up:30%, Down:70%</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-lg-3 perform" >
-                    <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">内存</span><span id="memery" class="fs20 tr">30 %</span><span id="memInfo" class="fs12">1243 MB</span></div>
-                </div>
-                <div class="col-lg-3 perform">
-                    <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">磁盘</span><span id="diskUsed" class="fs20 tr">30 %</span><span id="diskInfo" class="fs12">13 MB/秒</span></div>
-                </div>
-                <div class="col-lg-3 perform">
-                    <img src="images/jdtj_pic.png" />
-                    <div class="jkjd_sj_item"><span class="fs20 tl">网络</span><span id="netSpeed" class="fs20 tr">30 %<br /></span></div>
-                </div>
+
             </div>
             <div id = "svcView">
             </div>
@@ -72,47 +77,31 @@
                   <div class="panel-heading" style="padding: 0px">
                      <div class="row">
                           <div class="col-lg-2 col-md-2">
-                              <h4 id = "serviceName">&nbsp;&nbsp;&nbsp;service title</h4>
+                              <h6 id = "serviceName">&nbsp;&nbsp;&nbsp;service title</h6>
                           </div>
                           <div class="col-lg-3 col-md-3 col-lg-offset-7">
-                               <h5 id = "serviceInfo">版本号:3.3.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启动时间:2015-09-09</h5>
+                               <h6 id = "serviceInfo">版本号:3.3.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启动时间:2015-09-09</h6>
                           </div>
                       </div>
                   </div>
-                  <div class="panel-heading" style="background: #E4ECF7; padding: 5px 10px 5px 10px">
+                  <div class="panel-heading" style="background: #E4ECF7; padding: 0px 0px 0px 0px">
                       <div class="form-inline">
-                           <a href="#homePage" data-toggle="tab"><span class="glyphicon glyphicon-home"  data-toggle="tooltip"  title="主页" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>
                            <a href="#" onclick="StartService()" ><span id = "startIcon" class="glyphicon glyphicon-play" data-toggle="tooltip"  title="启动服务" style="margin-left: 10px"></span></a>
                            <a href="#" onclick="StopService()" ><span id = "stopIcon" class="glyphicon glyphicon-stop"  data-toggle="tooltip"  title="停止服务" style="margin-left: 10px"></span></a>
-                           <a id="debugTab" href="#debugTab" onclick="startDebug()" data-toggle="tab"><span id = "onlineDebug" class="glyphicon glyphicon-plane" data-toggle="tooltip"  title="在线调试" style="color:#BEBFC0; margin-left: 10px"></span></a>
-                          <a href="#" class="pull-right input-group-addon" onclick="ExecCmd()" style="margin-top: -5px;"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
+                           <input id='onlineDebugCheckBox' type="checkbox" name="onlineDebug" onclick="onOnlineDebugClick()"/>在线调试
+                          <a href="#" class="pull-right input-group-addon" onclick="ExecCmd()" style="margin-top: -5px;margin-bottom: -5px; height: 25px"><span class=" glyphicon glyphicon-ok-sign"  data-toggle="tooltip"  title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
                           <input id="sqlText" type="text" class="pull-right" style="margin-top: -3px; width: 300px">
-
                        </div>
                   </div>
-                  <div class="panel-body tab-content">
-                      <div id="svcPage" class="tab-pane fade in active">
-                          <ul id = "monitorObject" class="nav nav-tabs">
-                          </ul>
-                          <div id="toolbar" class="btn-group">
-                            <button type="button" class="btn btn-default">
-                                <i class="glyphicon glyphicon-plus"></i>
-                            </button>
-                            <button type="button" class="btn btn-default">
-                                <i class="glyphicon glyphicon-heart"></i>
-                            </button>
-                            <button type="button" class="btn btn-default">
-                                <i class="glyphicon glyphicon-trash"></i>
-                            </button>
-                           </div>
-                           <table id="table" data-toolbar="#toolbar"></table>
-                      </div>
-                      <div id="debugPage" class="tab-pane fade">
-                          <ul id = "debugArea" class="list-group">
-                            </ul>
-                          <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-lg"">
+                  <div class="panel-body" style="padding: 0px 15px 0px 15px; min-height: 400px">
+                      <ul id = "monitorObject" class="nav nav-tabs"></ul>
+                      <table id="table" data-toolbar="#toolbar"></table>
+                      <ul id = "debugArea" class="list-group">
+                          <li>abcdef</li>
+                      </ul>
+                      <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                   <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -127,7 +116,6 @@
                                 </div>
                               </div>
                             </div>
-                      </div>
                   </div>
               </div>
           </div>
@@ -273,6 +261,7 @@
 <script src="js/bootstrap-table.js"></script>
 <script src="js/bootstrap-table-zh-CN.js"></script>
 <script src="js/bootstrap-treeview.js"></script>
+<script src="js/Chart.bundle.js"></script>
 <script src="js/fileinput.js"></script>
 <script src="js/base64.js"></script>
 <script src="js/common.js"></script>

@@ -11,15 +11,33 @@ $(function(){
 		
 	};
 	doOnResize();
+	// var ctx = $("#myChart").get(0).getContext("2d");
+	// //This will get the first returned node in the jQuery collection.
+	// var data = [
+	// 	{
+	// 		value: 30,
+	// 		color:"#F38630"
+	// 	},
+	// 	{
+	// 		value : 50,
+	// 		color : "#E0E4CC"
+	// 	},
+	// 	{
+	// 		value : 100,
+	// 		color : "#69D2E7"
+	// 	}
+	// ];
+	// var options = {};
+	//var myNewChart = new Chart(ctx).Pie(data,options);
 });
 
 function doOnResize() {
-	var hg = Math.round(document.documentElement.clientHeight*0.35);
+	var hg = Math.round(document.documentElement.clientHeight*0.3);
 	$('#logDiv').height(hg);
 	if($("#logDiv").is(":hidden")){
 		Math.round(document.documentElement.clientHeight*0.8)
 	}else{
-		$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.5));
+		$('#mainBody').height(Math.round(document.documentElement.clientHeight*0.55));
 	}
 }
 
@@ -47,9 +65,12 @@ function doAddMonitorService() {
 function doHomePage() {
 	$('#monitorLog').show();
 	doOnResize();
-	console.log("doHomePage");
 }
 
+function doMonitorPage() {
+	$('#monitorLog').show();
+	doOnResize();
+}
 function addService() {
 	$("#addServiceForm").submit();
 }
