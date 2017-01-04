@@ -1,6 +1,6 @@
 $(function(){
-	$('#username').val('jerry');
-	$('#password').val('12345');
+	$('#username').val('admin');
+	$('#password').val('000000');
 });
 
 function login(){

@@ -1,16 +1,15 @@
 var g_curIp;
 var g_curServiceId;
-function showSvcPage(ip, serviceId) {
+function showSvcPage(serviceId) {
 	$('#myTab li:eq(1) a').tab('show');
 	$('#debugArea').hide();
-	 $('#table').bootstrapTable('destroy');
-	var curObj = g_intance.getSvc(ip, serviceId);
-	var server = g_intance.getServer(ip);
-	server.initServicePage(serviceId);
-	if (curObj.status_run == 1) {
-		server.listSvcItem(serviceId);
+	for(var service of g_intance.serviceMap.values())
+	{
+		service.stopStat();
 	}
-	g_curIp = ip;
+	var service = g_intance.getService(serviceId);
+	service.startStat();
+	service.showMe();
 	g_curServiceId = serviceId;
 }
 
@@ -20,54 +19,38 @@ var r = window.location.search.substr(1).match(reg);
 if (r != null) return unescape(r[2]); return null; 
 }
 
-function ListSvcItemInfo(ip, serviceId, obj)
+function ListSvcItemInfo(serviceId, obj)
 {
-	$('#debugArea').hide();
-	 $('#table').bootstrapTable('destroy');
-	var server = g_intance.getServer(ip);
-	server.listSvcItemInfo(serviceId, obj);
+	//$('#debugArea').hide();
+	var service = g_intance.getService(serviceId);
+	service.listSvcItemInfo(obj);
 }
 
 function ExecCmd() {
 	var server = g_intance.getServer(g_curIp);
-	var sql = $("#sqlText").val();
 	server.execCmd(g_curServiceId, sql);
 }
 
 function StartService(){
-	var server = g_intance.getServer(g_curIp);
-	server.startSvc(g_curServiceId);
-	server.getAllService();
-	showSvcPage(g_curIp, g_curServiceId);
+	var service = g_intance.getService(g_curServiceId);
+	service.start();
+	service.showMe();
 }
 
 function StopService() {
-	var server = g_intance.getServer(g_curIp);
-	server.stopSvc(g_curServiceId);
-	server.getAllService();
-	showSvcPage(g_curIp, g_curServiceId);
-}
-
-function showDebugModal(ip, fileLocation) {
-	var server = g_intance.getServer(ip);
-	var treeData = server.showDebugModal(fileLocation);
-	$('#debugModalBody').treeview({
-		data:treeData
-	});
+	var service = g_intance.getService(g_curServiceId);
+	service.stop();
+	service.showMe();
 }
 
 function onOnlineDebugClick() {
-	var server = g_intance.getServer(g_curIp);
+	var service = g_intance.getService(g_curServiceId);
 	if(document.getElementById("onlineDebugCheckBox").checked == true){
 		document.getElementById("onlineDebugCheckBox").checked =true;
-		server.openDebugFunc(g_curServiceId);
-		server.getAllService();
-		showSvcPage(g_curIp, g_curServiceId);
+		service.openDebugFunc();
 	}else{
 		document.getElementById("onlineDebugCheckBox").checked =false;
-		server.closeDebugFunc(g_curServiceId);
-		server.getAllService();
-		showSvcPage(g_curIp, g_curServiceId);
+		service.closeDebugFunc();
 	}
 }
 function showDebug() {
@@ -75,5 +58,22 @@ function showDebug() {
 	 $('#table').bootstrapTable('destroy');
 }
 
+function ClearAlert() {
+	var server = g_intance.getServer(g_curIp);
+	server.clearAlert(g_curServiceId);
+	server.getAllService();
+	showSvcPage(g_curIp, g_curServiceId);
+}
 
+function showSvcStat(serviceId) {
+	var service = g_intance.getService(serviceId);
+	service.showStat();
+}
+
+function showOperationLog() {
+	var service = g_intance.getService(g_curServiceId);
+	if (service == undefined)
+		return;
+	service.showOperationLog();
+}
 
