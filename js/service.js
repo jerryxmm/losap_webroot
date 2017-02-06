@@ -147,7 +147,7 @@ function operateFormatter(value, row, index) {
         return "";
     }
     var tmp = "<a href='#' onclick='GetSvcDebug(\"{0}\")' data-toggle='modal' data-target='#debugModal'><span class='glyphicon glyphicon-heart'></span></a>".format(row.DebugId);
-    console.log(tmp);
+    //console.log(tmp);
     return tmp;
 }
 

@@ -49,8 +49,13 @@ function doHomePage() {
 }
 
 function doMonitorPage() {
-	$('#monitorLog').show();
-	doOnResize();
+    if (g_intance.serviceMap.size > 0){
+        $('#monitorLog').show();
+	    doOnResize();
+    }
+    else{
+        showTip('请先添加需要监控的服务！');
+    }
 }
 function addService() {
 	$("#addServiceForm").submit();
@@ -121,6 +126,18 @@ function saveMonitorConfig() {
 	});
 	var content = {user:g_intance.localServer.userName, monitor:svrLst};
 	g_intance.localServer.saveToServer(JSON.stringify(content));
+}
+
+function dealTestSvcStatus(response)
+{
+	console.log(response);
+}
+
+function testSvcStatus(){
+	g_intance.serverMap.forEach(function (server, ip) {
+		var para = {service_id:['A5_MCenter_xhm']};
+		server.serverRequest("GetSvcStatus",para, dealTestSvcStatus);
+	});
 }
 
 function delMonitor(serviceId) {
@@ -233,6 +250,8 @@ function showXmlConfig(serviceId) {
 	var service = g_intance.getService(serviceId);
 	service.getSvcXml();
 }
+
+
 
 function loadModService() {
 	$("#modServiceSidebar").empty();
