@@ -36,4 +36,25 @@ function loadXMLDoc(username,password,url)
 		  //var response = xmlhttp.responseText;
         }
     }
-}  
+}
+function testCors() {
+		var url = "http://{0}:{1}{2}".format("192.168.60.167", "4101", "/action/corsService");
+	console.log(url);
+		var para = {cipher: "thisIsForeignKey"};
+		var req = new Request("1.0", "GetSvcStatus", para);
+
+    	var postStr = JSON.stringify(req);
+			console.log(postStr);
+			$.ajax({
+			url:url,
+			data: postStr,
+			async:true,
+			type:"POST",
+			success :function(response){
+				console.log(response);
+			},
+			error: function() {
+				console.log("testCors error!");
+			}
+		});
+	};

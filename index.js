@@ -1,6 +1,6 @@
 var g_intance;
 $(function(){
-    $("#fakeloader").fakeLoader({
+    $(".fakeloader").fakeLoader({
         timeToHide:1200,
         bgColor:"#3498db",
         spinner:"spinner4"
@@ -238,17 +238,15 @@ function loginForeignServer(serviceId, ip, port, userName, pass) {
 }
 
 function saveXmlConfig() {
-	var showText = $('#curSvc').val();
-	var ip = showText.split(':')[0];
-	var serviceId = showText.split(':')[1];
-	var server = g_intance.getServer(ip);
-	server.saveXml(serviceId);
+	var serviceId = $('#curSvc').text();
+	var service = g_intance.getService(serviceId);
+	service.saveXml($('#xmlContent').val());
 }
 
 function showXmlConfig(serviceId) {
 	$('#curSvc').text(serviceId);
 	var service = g_intance.getService(serviceId);
-	service.getSvcXml();
+	service.getXml();
 }
 
 

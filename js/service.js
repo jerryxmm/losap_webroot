@@ -374,9 +374,13 @@ function dealStartService(response, serviceId) {
     var obj = JSON.parse(response);
     var code = obj.code;
     if (code >= 0)
+    {
+        $("#startIcon").css({"color":"#BEBFC0"});
+        $("#stopIcon").css({"color":"red"});
         showTip("启动服务成功！");
+    }
     else{
-        showTip("启动服务" + serviceId + "失败！未获取到失败原因！")
+        showTip("启动服务" + serviceId + "失败！失败原因请查看日志！")
     }
 }
 
@@ -388,80 +392,35 @@ Service.prototype.start = function () {
         alert("当前服务已经启动");
     }
     else{ //当前为服务停止状态，点击后启动服务
-        $('#fakeloader').empty();
-        $('#fakeloader').removeAttr("style");
-    $("#fakeloader").fakeLoader({
-	            timeToHide:3000,
-                bgColor:"#3498db",
-	            spinner:"spinner2"
-    });
     server.serverRequest("ExecCmdStart", para, dealStartService, false);
     }
 };
+
+function dealStopService(response, serviceId)
+{
+    var obj = JSON.parse(response);
+    var code = obj.code;
+    if (code >= 0)
+    {
+        $("#startIcon").css({"color":"green"});
+        $("#stopIcon").css({"color":"#BEBFC0"});
+        showTip("启动停止成功！");
+    }
+    else{
+        showTip("停止服务" + serviceId + "失败！失败原因请查看日志！")
+    }
+}
 
 Service.prototype.stop = function () {
     var server = g_intance.getServer(this.serverIp);
     var para = {service_id:this.serviceId};
     if (this.status_run == 1) {
-        $(".fakeloader").fakeLoader({
-            timeToHide:1200,
-            bgColor:"#e74c3c",
-            spinner:"spinner2"
-        });
-        server.serverRequest("ExecCmdStop", para, "NULL", false);
+        server.serverRequest("ExecCmdStop", para, dealStopService, false);
     }
     else {
         alert("当前服务已经停止");
     }
 };
-
-function traverseNode(node, layer) {
-    if (node.nodeName == "#text")
-        return;
-	var desc = "";
-	var atts = node.attributes;
-	if (layer != 1)
-	{
-		if (atts != undefined)
-		{
-			desc = node.nodeName;
-			if (node.hasAttribute("ps"))
-			{
-					desc = desc + "--" + node.getAttribute("ps");
-			}
-
-			for(var i = 0; i < atts.length; i++)
-			{
-				var att = atts[i];
-				if (att.name == "ps") {
-					continue
-				}
-				else if (att.name == "Value")
-				{
-					var length =node.getAttribute("Value").length * 5;
-					$("#xmlContent").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px' attr = '{3}'>{1}</div>"
-						.format(att.nodeValue, desc, node.nodeName,att.name));
-				}
-				else
-				 {
-					 $("#xmlContent").append("<div class='list-inline' style='margin-left: 3%; margin-bottom: 10px'><input class='configValue' type='text' value='{0}' name='{2}' style='width: 300px'  attr = '{3}'>{1}</div>"
-						.format(att.nodeValue, att.name, node.nodeName, att.name));
-				 }
-			}
-		}
-	}
-
-	if (layer == 2)
-	{
-		$('#xmlContent').append("<h5 style=\"font-weight:bold;\">{0}</h5>".format(desc));
-	}
-    var children = node.childNodes;
-    for(var i = 0; i < children.length; i++)
-    {
-        var child = children[i];
-        traverseNode(child, layer+1);
-    }
-}
 
 var xmlDoc;
 function dealSvcXml(response) {
@@ -472,18 +431,10 @@ function dealSvcXml(response) {
         return;
     }
     var xml = obj.content;
-    parser=new DOMParser();
-    xmlDoc=parser.parseFromString(xml,"text/xml");
-    $('#xmlContent').empty();
-    traverseNode(xmlDoc.documentElement, 1);
-    $('.configValue').on('input', function() {
-        var node = xmlDoc.getElementsByTagName($(this).attr('name'));
-        var attr = $(this).attr('attr');
-        node[0].setAttribute(attr, $(this).val());
-    });
+    $('#xmlContent').val(xml);
 };
 
-Service.prototype.getSvcXml = function () {
+Service.prototype.getXml = function () {
     var para = {};
     para.service_id = this.serviceId;
     var server = g_intance.getServer(this.serverIp);
@@ -493,15 +444,14 @@ Service.prototype.getSvcXml = function () {
 function XML2String(xmlObject) {
     return (new XMLSerializer()).serializeToString(xmlObject);
 };
-Service.prototype.saveXml = function() {
-    if (xmlDoc == undefined)
-        return;
+Service.prototype.saveXml = function(content) {
     var server = g_intance.getServer(this.serverIp);
-    var content = XML2String(xmlDoc);
     var para = {};
     para.service_id = this.serviceId;
     para.content = content;
     server.serverRequest("SaveSvcXml", para, "NULL");
+    $('#xmlContent').val('');
+    showTip("配置文件保存成功");
 };
 
 function dealShowOperationLog(response) {
