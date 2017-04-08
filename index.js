@@ -6,9 +6,6 @@ $(function(){
         spinner:"spinner4"
     });
 	setLoginUser();
-	window.onbeforeunload = function () {
-		
-	};
 });
 
 function doOnResize() {
@@ -23,19 +20,19 @@ function doOnResize() {
 
 function setLoginUser()
 {
-	var xmlhttp = sendRequest("/action/getLoginUser", 'GET',  "application/x-www-form-urlencoded", "");
-	xmlhttp.onreadystatechange=function()
-	  {
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-	   	{
-		 	//举个例子,如果结果是1代表登录成功跳转到index.html，并保存用户名否则提示登录失败消息
-		  	var user=xmlhttp.responseText;
+	$.ajax({
+		url:"/action/getLoginUser",
+		type:"POST",
+		success :function(response){
 			g_intance = new Manager();
 			g_intance.init(user);
 		  	var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + user;
-		  	$('#loginUserName').html(user);
-	    }
-	  }
+		  	$('#loginUserName').html(response);
+		},
+		error: function() {
+			console.log("获取用户名失败!");
+		}
+	});
 }
 
 function doAddMonitorService() {
@@ -131,13 +128,6 @@ function saveMonitorConfig() {
 function dealTestSvcStatus(response)
 {
 	console.log(response);
-}
-
-function testSvcStatus(){
-	g_intance.serverMap.forEach(function (server, ip) {
-		var para = {service_id:['A5_MCenter_xhm']};
-		server.serverRequest("GetSvcStatus",para, dealTestSvcStatus);
-	});
 }
 
 function delMonitor(serviceId) {
@@ -255,8 +245,9 @@ function loadModService() {
 	$("#modServiceSidebar").empty();
 	var sideBarHtml = "<ul class='nav nav-list'>";
 	var icon = "", color = "";
-	for(var service of g_intance.serviceMap.values())
+	for(var i = 0; i < serviceList.length; i++)
 	{
+		var service = serviceList[i];
 		if (service.status_run == 1){
 			icon = 'glyphicon-play';
 			color = 'green';

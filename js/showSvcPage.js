@@ -53,6 +53,7 @@ function onOnlineDebugClick() {
 		service.closeDebugFunc();
 	}
 }
+
 function showDebug() {
 	$('#debugArea').show();
 	 $('#table').bootstrapTable('destroy');
@@ -61,7 +62,6 @@ function showDebug() {
 function ClearAlert() {
 	var server = g_intance.getServer(g_curIp);
 	server.clearAlert(g_curServiceId);
-	server.getAllService();
 	showSvcPage(g_curIp, g_curServiceId);
 }
 

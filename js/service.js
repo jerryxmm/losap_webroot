@@ -128,14 +128,17 @@ Service.prototype.getStat = function () {
     }
 };
 
+//开启获取服务调试功能的定时器
 Service.prototype.startStat = function () {
     this.statTimer = setInterval("g_intance.serviceMap.get('{0}').getStat()".format(this.serviceId) ,Service.updataLag);
 };
 
+//关闭获取服务调试功能的定时器
 Service.prototype.stopStat = function () {
   clearInterval(this.statTimer);
 };
 
+//获取单个功能码的具体通信信息
 function GetSvcDebug(debugId) {
     var service = g_intance.getService(g_curServiceId);
     service.getDebugInfo(debugId);
@@ -200,17 +203,18 @@ function showDebugInfo(data, serviceId) {
     });
     var nodeRsp = {text: '回复', nodes:[]};
     var rsps = packet.Rsp;
-    for(var i = 0; i < rsps.length; i++)
-    {
-        var node = {text:"{0}".format(i+1), nodes:[]};
-        var rsp = rsps[i];
-        if (rsp == undefined)
-            continue;
-        $.each(rsp, function (name, value) {
-            var leaf = {text:"{0} = {1}".format(name, value)}
-            node.nodes.push(leaf);
-        });
-        nodeRsp.nodes.push(node);
+    if (rsps != undefined) {
+        for (var i = 0; i < rsps.length; i++) {
+            var node = {text: "{0}".format(i + 1), nodes: []};
+            var rsp = rsps[i];
+            if (rsp == undefined)
+                continue;
+            $.each(rsp, function (name, value) {
+                var leaf = {text: "{0} = {1}".format(name, value)}
+                node.nodes.push(leaf);
+            });
+            nodeRsp.nodes.push(node);
+        }
     }
     var tree =[nodeReq, nodeRsp];
     $('#debugModalBody').treeview({
@@ -265,10 +269,13 @@ function ShowListSvcInfo(response)
       var data = table.records;
       var head = [];
       var rec = {};
-      for(var i = 0; i < metadata.length; i++)
+      if (metadata != undefined)
       {
-          var headCol = {title: metadata[i].ColDesc,field: metadata[i].ColName};
-          head.push(headCol);
+          for(var i = 0; i < metadata.length; i++)
+          {
+              var headCol = {title: metadata[i].ColDesc,field: metadata[i].ColName};
+              head.push(headCol);
+          }
       }
     $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['zh-CN']);
     $('#table').bootstrapTable({
@@ -287,12 +294,14 @@ function ShowListSvcInfo(response)
     });
 };
 
+//获取某项监控项目的详细信息，如获取所有线程信息
 Service.prototype.listSvcItemInfo = function (obj) {
     var para = {service_id:this.serviceId, object:obj};
     var server = g_intance.getServer(this.serverIp);
     server.serverRequest("ListSvcItemInfo", para, ShowListSvcInfo);
 };
 
+//获取监控项目列表的处理回调函数
 function ShowListSvcItem(str, serviceId)
 {
      var service = g_intance.getService(serviceId);
@@ -312,6 +321,8 @@ function ShowListSvcItem(str, serviceId)
     service.listItemLis += lis;
     service.isSvcItemInit = true;
 }
+
+//获取监控项目列表(比如 线程，用户信息，等等)
 Service.prototype.listItem =  function()
 {
     if(this.status_run != 1)
@@ -321,6 +332,7 @@ Service.prototype.listItem =  function()
     server.serverRequest("ListSvcItem", para, ShowListSvcItem, false);
 };
 
+//刷新单个服务监控信息
 Service.prototype.updateHead = function () {
      var server = g_intance.getServer(this.serverIp);
     $('#serviceName').text(this.serviceId);
@@ -358,6 +370,7 @@ Service.prototype.updateHead = function () {
     }
 }
 
+//切换显示当前选中的服务监控信息
 Service.prototype.showMe = function () {
     this.updateHead();
     if (!Boolean(this.isSvcItemInit))
@@ -370,6 +383,7 @@ Service.prototype.showMe = function () {
     this.showStat();
 };
 
+//启动服务功能的处理回调函数
 function dealStartService(response, serviceId) {
     var obj = JSON.parse(response);
     var code = obj.code;
@@ -377,25 +391,27 @@ function dealStartService(response, serviceId) {
     {
         $("#startIcon").css({"color":"#BEBFC0"});
         $("#stopIcon").css({"color":"red"});
-        showTip("启动服务成功！");
+        showTip("{0} 启动服务成功！".format(serviceId));
     }
     else{
         showTip("启动服务" + serviceId + "失败！失败原因请查看日志！")
     }
 }
 
+//启动服务功能
 Service.prototype.start = function () {
-
     var server = g_intance.getServer(this.serverIp);
     var para = {service_id:this.serviceId};
     if (this.status_run == 1){
         alert("当前服务已经启动");
     }
     else{ //当前为服务停止状态，点击后启动服务
-    server.serverRequest("ExecCmdStart", para, dealStartService, false);
+        server.serverRequest("ExecCmdStart", para, dealStartService);
+        showTip("{0} 服务启动中.....".format(this.serviceId));
     }
 };
 
+//停止服务功能的处理回调函数
 function dealStopService(response, serviceId)
 {
     var obj = JSON.parse(response);
@@ -411,6 +427,7 @@ function dealStopService(response, serviceId)
     }
 }
 
+//停止服务功能
 Service.prototype.stop = function () {
     var server = g_intance.getServer(this.serverIp);
     var para = {service_id:this.serviceId};
@@ -422,7 +439,7 @@ Service.prototype.stop = function () {
     }
 };
 
-var xmlDoc;
+//获取服务的配置文件功能的处理回调函数
 function dealSvcXml(response) {
     var obj = JSON.parse(response)
     if (obj.code < 0)
@@ -433,7 +450,7 @@ function dealSvcXml(response) {
     var xml = obj.content;
     $('#xmlContent').val(xml);
 };
-
+//获取服务的配置文件功能
 Service.prototype.getXml = function () {
     var para = {};
     para.service_id = this.serviceId;
@@ -441,9 +458,7 @@ Service.prototype.getXml = function () {
     server.serverRequest("GetSvcXml", para, dealSvcXml);
 };
 
-function XML2String(xmlObject) {
-    return (new XMLSerializer()).serializeToString(xmlObject);
-};
+//保存服务配置文件到服务端功能
 Service.prototype.saveXml = function(content) {
     var server = g_intance.getServer(this.serverIp);
     var para = {};
@@ -454,6 +469,7 @@ Service.prototype.saveXml = function(content) {
     showTip("配置文件保存成功");
 };
 
+//获取当前服务的操作日志文件功能的回调函数
 function dealShowOperationLog(response) {
     console.log(response);
     var obj = JSON.parse(response)
@@ -467,6 +483,7 @@ function dealShowOperationLog(response) {
 	$('#operationLogDlg').modal('show');
 }
 
+//获取当前服务的操作日志文件
 Service.prototype.showOperationLog = function () {
     var server = g_intance.getServer(this.serverIp);
     var para = {};

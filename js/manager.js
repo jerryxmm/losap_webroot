@@ -28,23 +28,24 @@ Manager.prototype.init = function (user) {
 	{
 		var moniConf = JSON.parse(local.monitorConfig);
 		var monitor = moniConf.monitor;
-		for(var i = 0; i < monitor.length; i++)
-		{
-			var serverConf = monitor[i];
-			var server;
-			if (serverConf.ip == localIP){
-				server = local;
-			}else{
-				server = new Server(serverConf.desc, serverConf.ip, serverConf.port, true, serverConf.cipher, serverConf.user);
+		if (monitor != undefined) {
+			for (var i = 0; i < monitor.length; i++) {
+				var serverConf = monitor[i];
+				var server;
+				if (serverConf.ip == localIP) {
+					server = local;
+				} else {
+					server = new Server(serverConf.desc, serverConf.ip, serverConf.port, true, serverConf.cipher, serverConf.user);
+				}
+				server.monitorService = serverConf.monitor_service;
+				server.netPing();
+				if (server.alive == 'wakeUp') {
+					server.startMonitor();
+				} else if (server.alive == 'dead') {
+					server.startHeartBeatTimer();
+				}
+				this.serverMap.set(serverConf.ip, server);
 			}
-			server.monitorService = serverConf.monitor_service;
-			server.netPing();
-			if (server.alive == 'wakeUp'){
-				server.startMonitor();
-			}else if (server.alive == 'dead'){
-				server.startHeartBeatTimer();
-			}
-			this.serverMap.set(serverConf.ip, server);
 		}
 	}
 	else {
