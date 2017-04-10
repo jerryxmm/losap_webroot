@@ -25,8 +25,8 @@ function setLoginUser()
 		type:"POST",
 		success :function(response){
 			g_intance = new Manager();
-			g_intance.init(user);
-		  	var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + user;
+			g_intance.init(response);
+		  	var user = "<span class=\"glyphicon glyphicon-user\"></span>" + "   " + response;
 		  	$('#loginUserName').html(response);
 		},
 		error: function() {
@@ -245,9 +245,8 @@ function loadModService() {
 	$("#modServiceSidebar").empty();
 	var sideBarHtml = "<ul class='nav nav-list'>";
 	var icon = "", color = "";
-	for(var i = 0; i < serviceList.length; i++)
+	for(var service of g_intance.serviceMap.values())
 	{
-		var service = serviceList[i];
 		if (service.status_run == 1){
 			icon = 'glyphicon-play';
 			color = 'green';
