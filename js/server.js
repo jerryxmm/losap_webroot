@@ -151,6 +151,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			$.ajax({
 			url:url,
 			data: postStr,
+			timeout : 60000,
 			async:async,
 			type:"POST",
 			success :function(response){

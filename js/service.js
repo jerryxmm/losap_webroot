@@ -124,7 +124,7 @@ Service.prototype.getStat = function () {
     var server = g_intance.getServer(this.serverIp);
     var para = {service_id:this.serviceId,  file_location:this.statFileLocation};
     if (this.status_run == 1) {
-        server.serverRequest("GetSvcStat", para, dealGetSvcStat);
+        server.getState("GetSvcStat", para, dealGetSvcStat);
     }
 };
 
