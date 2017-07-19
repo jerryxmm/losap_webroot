@@ -1,0 +1,10 @@
+<script src="addService.js"></script>
+<div class="tab-pane">
+    <div class="maintance">
+        <label class="control-label uploadLable"> 请上传新增服务的配置文件(bin目录)</label>
+          <form id = "addServiceForm" target="index.html" method="post" action="/action/addSvc" enctype="multipart/form-data" >
+              <input id = "file" name="FileZip" type="file" class="file" data-show-preview="false" data-allowed-file-extensions='["zip"]'>
+        </form>
+          <button id = "addService" type="button" class="btn btn-default" onclick="addService()">添加服务</button>
+    </div>
+</div>

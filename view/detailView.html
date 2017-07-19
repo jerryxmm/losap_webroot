@@ -1,0 +1,106 @@
+<div class="row tab-pane" ng-controller="detailView_ctrl">
+    <div class="col-lg-2 col-md-2">
+        <ul id="sidebar" class='nav nav-list'>
+            <li ng-repeat="svc in serviceList">
+                <a class='list-group-item' ng-click='setCurSvc(svc)'>
+                <span class="glyphicon" ng-class="{'svc_normal': 'glyphicon-play green', 'svc_alter': 'glyphicon-play red','svc_disconnect': 'glyphicon-stop grey'}[svc.svcStyle]"></span>
+                {{svc.serviceId}}</a>
+            </li>
+        </ul>
+    </div>
+    <div id="content" class="col-lg-10 col-md-10" style="padding: 0px; width: 81.33333%">
+      <div class="panel panel-default">
+          <div class="panel-heading" style="padding: 0px">
+              <div class="row">
+                  <div class="col-md-2 row">
+                      <div class="col-lg-6 col-md-6">
+                          <h6>{{curSvc.serviceId}}</h6>
+                      </div>
+                      <div class="col-lg-6 col-md-6">
+                           <h6>版本:{{curSvc.monitor_data.version}}</h6>
+                           <h6>启动时间:{{curSvc.monitor_data.uptime}}</h6>
+                      </div>
+                 </div>
+                  <div class="col-md-10 row">
+                     <div class="col-lg-2 col-md-2">
+                          <h6>CPU:{{curSvc.server.serverInfo.CPU}}</h6>
+                          <h6>MEM:{{curSvc.server.serverInfo.CPU}}</h6>
+                      </div>
+                     <div class="col-lg-2 col-md-2">
+                          <h6>全部笔数:{{curSvc.monitor_data.all_proc}}</h6>
+                          <h6>未处理数:{{curSvc.monitor_data.unproc}}</h6>
+                      </div>
+                     <div class="col-lg-2 col-md-2">
+                          <h6>处理速度:{{curSvc.monitor_data.proc_speed}}</h6>
+                          <h6>下级连接:</h6>
+                      </div>
+                     <div class="col-lg-2 col-md-2">
+                          <h6>总线程数:</h6>
+                          <h6>总服务数:</h6>
+                      </div>
+                     <div class="col-lg-2 col-md-2">
+                          <h6>全局事务:</h6>
+                          <h6>原子事务:</h6>
+                      </div>
+                     <div class="col-lg-2 col-md-2">
+                          <h6>订阅数量:</h6>
+                          <h6>会话统计:</h6>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="panel-heading" style="background: #E4ECF7; padding: 0px 0px 0px 0px">
+              <div class="form-inline">
+                   <!--<a href="#" ><span class="glyphicon glyphicon-repeat"  data-toggle="tooltip"  title="重启服务" style="color: #597D89; margin-left: 10px"></span></a>-->
+                   <a href="" ng-click="startService()" ><span ng-class="{0: 'green', 1: 'grey'}[curSvc.monitor_data.status_run]" class="glyphicon glyphicon-play operatorIcon" title="启动服务"></span></a>
+                   <a href="" ng-click="stopService()" ><span ng-class="{0: 'grey', 1: 'red'}[curSvc.monitor_data.status_run]"  class="glyphicon glyphicon-stop operatorIcon"  title="停止服务"></span></a>
+                   <a href="" ng-click="clearAlert()" ><span ng-class="{0: 'grey', 1: 'yellow'}[curSvc.monitor_data.status_alert]"  class="glyphicon glyphicon-alert operatorIcon" title="清除报警"></span></a>
+                   <a href="" ng-click="showOperationLog()" ><span class="glyphicon glyphicon-question-sign operatorIcon"  data-toggle="tooltip"  title="显示操作日志"></span></a>
+                   <a href="" ng-click="showSqlLog()" ><span class="glyphicon glyphicon-question-sign operatorIcon"  data-toggle="tooltip"  title="显示sql日志"></span></a>
+                   <input type="checkbox" ng_model="curSvc.monitor_data.online_debug" ng-click="onOnlineDebugClick()"/>在线调试
+                   <a href="" class="pull-right input-group-addon" ng-click="execCmd()" style="margin-top: -5px;margin-bottom: -5px; height: 25px"><span class=" glyphicon glyphicon-ok-sign" title="执行命令"  style="color:#597D89;margin-left: -5px"></span></a>
+                  <input ng_model="sqlText" type="text" class="pull-right" style="margin-top: -3px; width: 300px">
+               </div>
+          </div>
+          <div class="panel-body" style="padding: 0px 15px 0px 15px; min-height: 400px">
+              <ul id = "monitorItemNav" class="nav nav-tabs">
+                  <li class="active"><a href='' data-toggle='tab' ng-click="showSvcStat(curSvc.serviceId)">业务状况</a></li>
+                  <li ng-repeat="item in curSvc.listItem" ng-if="item.show == 1"><a href='' data-toggle='tab' ng-click="ListSvcItemInfo(item)">{{item.name}}</a></li>
+              </ul>
+              <div id="monitorItemTab">
+                  <table id="table"></table>
+              </div>
+              <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="debugModalLabel">Modal title</h4>
+                          </div>
+                          <div id="debugModalBody" class="modal-body">
+                            ...
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div id="operationLogDlg" class="modal fade">
+  <div class="modal-dialog" style="width:80%;height: 80%;">
+    <div class="modal-content" style="width:100%;height: 100%;">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 id="operationLogFileNameId" class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body" style="width:100%;height: 90%;">
+        <textarea id="operationLogContentId" class="form-control" rows="3" style="width:100%;height: 100%;"></textarea>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

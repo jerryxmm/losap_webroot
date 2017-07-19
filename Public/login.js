@@ -1,6 +1,11 @@
 $(function(){
 	$('#username').val('admin');
 	$('#password').val('000000');
+	console.log("username: " + getQueryString('username'));
+	if (getQueryString('username') != undefined && getQueryString('password') != undefined)
+	{
+		loadXMLDoc(getQueryString('username') , getQueryString('password'),'/action/login');
+	}
 });
 
 function login(){
@@ -11,6 +16,12 @@ function login(){
 		return;
 	}
 	loadXMLDoc(username,password,'/action/login');
+}
+
+function getQueryString(name) {
+var reg = new RegExp("(^|&)"+ name + "=([^&]*)(&|$)","i");
+var r = window.location.search.substr(1).match(reg);
+if (r != null) return unescape(r[2]);return null;
 }
 
 function loadXMLDoc(username,password,url)
@@ -31,13 +42,20 @@ function loadXMLDoc(username,password,url)
 	 xmlhttp.onreadystatechange=function()
     {
       if (xmlhttp.readyState==4 && (xmlhttp.status==200)){
-		  window.location.href="../index.html";
+		  if (getQueryString('servicename') != undefined)
+		  {
+			   window.location.href="../index.html?servicename=" + getQueryString('servicename');
+		  }
+		  else
+		  {
+			   window.location.href="../index.html";
+		  }
         }
     }
 }
 
 function testCors(ip) {
-		var url = "http://{0}:{1}{2}".format(ip, "4101", "/action/corsService");
+		var url = "http://{0}:{1}{2}".format(ip, "4101", "/action/corsAsync");
 	console.log(url);
 		var para = {cipher: "thisIsForeignKey"};
 		var req = new Request("1.0", "GetSvcStatus", para);

@@ -1,0 +1,43 @@
+<script src="overView.js"></script>
+<div class="tab-pane" ng-controller="overView_ctrl">
+    <div id="serverPerform" class="row jkjd_main">
+        <div class='col-lg-3 col-md-4' ng-repeat="server in serverList">
+            <div ng-class="{'dead': 'perform_dead', 'alive': 'perform_alive'}[server.alive]">
+                <div class='col-lg-2 col-md-2'>
+                    <img src='../images/jdtj_pic.png' />
+                </div>
+                <div class='col-lg-10 col-md-10'>
+                    <div class='serverName'>
+                       <span class='performItem'>{{server.desc}}</span>
+                    </div>
+                    <div class='row'>
+                        <div class='col-lg-3 col-md-3'><span class='performItem'>CPU:{{server.serverInfo.CPU}}%</span></div>
+                        <div class='col-lg-9 col-md-9'><span class='performItem'>磁盘:Used:{{server.serverInfo.DiskTotal - server.serverInfo.DiskFree}}G, Free:{{server.serverInfo.DiskFree}}G</span></div>
+                    </div>
+                    <div class='row'>
+                        <div class='col-lg-3 col-md-3'><span class='performItem'>Mem:{{server.serverInfo.MemUsedPercent}}%</span></div>
+                        <div class='col-lg-9 col-md-9'><span class='performItem'>网速:Up:{{server.serverInfo.up}}kb/s, Down:{{server.serverInfo.down}}kb/s</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="jkjd_fw_title"></div>
+        <div class='row' style='margin-left: 10px'>
+            <div class='col-lg-2 col-md-3 col-sm-4' ng-repeat="svc in serviceList">
+                <div ng-class="svc.svcStyle">
+                <a href="" ui-sref="detailView" ng-attr-title="{{svc.serverIp}}" ng-click='showSvcPage(svc)'>{{svc.serviceId}}</a><span class='r tc'></span>
+                <div class='row jkjd_yj'>
+                <div class='col-lg-3 col-md-3'><span class='glyphicon glyphicon-user'>{{svc.monitor_data.online_client}}</span></div>
+                <div class='col-lg-9 col-md-9'>
+                    <p class='info'>全部笔数<span class='fs20'>{{svc.monitor_data.all_proc}}</span></p>
+                    <p class='info'>未处理笔数<span class='fs20'>{{svc.monitor_data.unproc}}</span></p>
+                    <p class='info'>处理速度<span class='fs20'>{{svc.monitor_data.proc_speed}}</span></p>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
