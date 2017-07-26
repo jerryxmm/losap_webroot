@@ -251,12 +251,18 @@ Service.prototype.getXml = function (okFunc) {
     this.server.serverRequest("GetSvcXml", para, okFunc);
 };
 
+function Appendzero(obj)
+{
+    if(obj<10) return "0" +""+ obj;
+    else return obj;
+}
+
 Service.prototype.getCurDate = function(){
     var datetime = new Date();
     var year = datetime.getFullYear();
     var month = datetime.getMonth() + 1;
     var date = datetime.getDate();
-    return "{0}{1}{2}".format(year, month, date);
+    return "{0}{1}{2}".format(year, Appendzero(month), date);
 };
 
 //保存服务配置文件到服务端功能

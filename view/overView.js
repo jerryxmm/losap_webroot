@@ -8,6 +8,7 @@ app.controller("overView_ctrl", ['$scope','$interval', function($scope, $interva
         $scope.serviceList = g_intance.serviceList();
     };
     doOnResize();
+    $('#monitorLog').show();
     overViewScope = $scope;
     $scope.showSvcPage = function(svc)
     {

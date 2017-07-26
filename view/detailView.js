@@ -1,20 +1,22 @@
 /**
  * Created by jerry on 17-7-18.
  */
-app.controller("detailView_ctrl", ['$scope', '$interval', '$timeout', function($scope, $interval, $timeout){
+app.controller("detailView_ctrl", ['$scope', '$interval', '$timeout', '$stateParams',
+    function($scope, $interval, $timeout, $stateParams){
     $scope.fresh = function (){
 		if (g_intance.readyFinish)
 		{
 			$scope.serviceList = g_intance.serviceList();
-            $scope.curSvc = g_intance.getCurSvc();
+            $scope.curSvc = g_intance.getService($stateParams.serviceName);
 		}else{
 			$timeout(function() {
 				$scope.serviceList = g_intance.serviceList();
-                $scope.curSvc = g_intance.getCurSvc();
+                $scope.curSvc = g_intance.getService($stateParams.serviceName);
                 $scope.showSvcStat();
 			},500);
 		}
         doOnResize();
+        $('#monitorLog').show();
 	};
 	$scope.fresh();
 

@@ -235,11 +235,12 @@ Manager.prototype.serviceList = function(){
 //      {"ip":"192.168.0.66","port":"4101","cipher":"thisIsForeignKey","user":"admin","monitor_service":["test_queue2","test_arbit","test_mdb2"]},
 // 	]
 // }
-Manager.prototype.init = function (user) {
+Manager.prototype.init = function (user, finishDo) {
 	// step1.先初始化本地服务器类，
 	var localIP = window.location.host.split(':')[0];
 	var local = new Server('本机',localIP, window.location.port, false, "", user);
 	this.localServer = local;
+	var my = this;
 	// step2: 获取服务端配置
 	local.serverRequest("GetForeignServer", {fileName:"{0}_monitorService.json".format(local.userName)},
 		function(data) {
@@ -274,7 +275,7 @@ Manager.prototype.init = function (user) {
 			// step4: 解析失败则获取本机所有服务的监控数据
 			if (!parseFlag)
 			{
-				this.serverMap.set(local.ip, local);
+				my.serverMap.set(local.ip, local);
 				var para = {};
 				local.serverRequest("ListSvc", para, function(data){
 					var obj = JSON.parse(data);
@@ -295,9 +296,11 @@ Manager.prototype.init = function (user) {
 					local.monitorConfig = JSON.stringify(tObj);
 					local.saveToServer();
 					g_intance.initLogView();
+					finishDo();
 				});
 			}else{
 				g_intance.initLogView();
+				finishDo();
 			}
 		});
 };

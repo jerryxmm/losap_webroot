@@ -7,13 +7,16 @@ app.config(function ($stateProvider, $urlRouterProvider) {
      $stateProvider
         .state("overView", {
             url:"/overView",
-            templateUrl: "view/overView.html"
+            templateUrl: "view/overView.html",
+            controller:'overView_ctrl',
         }).state("detailView", {
+            params:{"serviceName":null},
             url:"/detailView",
-            templateUrl: "view/detailView.html"
+            templateUrl: "view/detailView.html",
+            controller:'detailView_ctrl',
         }).state("addMonitorService", {
             url:"/addMonitorService",
-            templateUrl: "maintance/addMonitorService.html"
+            templateUrl: "maintance/addMonitorService.html",
         }).state("removeMonitorService", {
             url:"/removeMonitorService",
             templateUrl: "maintance/removeMonitorService.html"
@@ -22,10 +25,12 @@ app.config(function ($stateProvider, $urlRouterProvider) {
             templateUrl: "maintance/addService.html"
         }).state("removeService", {
             url:"/removeService",
-            templateUrl: "maintance/removeService.html"
+            templateUrl: "maintance/removeService.html",
+            controller:'removeService_ctrl'
         }).state("modService", {
             url:"/modService",
-            templateUrl: "maintance/modService.html"
+            templateUrl: "maintance/modService.html",
+            controller:'modService_ctrl',
         }).state("update", {
             url:"/update",
             templateUrl: "maintance/update.html"
@@ -34,7 +39,8 @@ app.config(function ($stateProvider, $urlRouterProvider) {
 
 var detailViewScope;
 var overViewScope;
-app.controller('pageTab_ctrl', ['$scope','$interval','$location', function($scope, $interval, $location){
+app.controller('pageTab_ctrl', ['$scope','$interval','$location','$state',
+    function($scope, $interval, $location, $state){
     $scope.isActive = function (viewLocation) {
         return viewLocation === $location.path();
     };
@@ -51,7 +57,12 @@ app.controller('pageTab_ctrl', ['$scope','$interval','$location', function($scop
             type:"POST",
             success :function(response){
                 g_intance = new Manager();
-                g_intance.init(response);
+                g_intance.init(response, function(){
+                    if (getQueryString('servicename') != undefined)
+                    {
+                        $state.go('detailView', {serviceName:getQueryString('servicename')});
+                    }
+                });
                 $scope.userName = response;
                 fresh();
             },
