@@ -94,12 +94,13 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 	};
 
 	var logFileLocation = {};
+	var statFileLocation = {};
 	var freshSvcStatuFlag = true;
 	function dealSvcStatu(response){
 		freshSvcStatuFlag = true;
 		var obj = JSON.parse(response);
 		logFileLocation = obj.log_file_location;
-		$('#monitorLog').logview('dealLog', obj.logs);
+		statFileLocation = obj.stat_file_location;
 
         mySelf.serverInfo = obj.serverInfo;
 		mySelf.serverInfo['up'] = (mySelf.serverInfo.UpSpeed * 1000).toFixed(0);
@@ -113,6 +114,7 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 			return;
         for(var i = 0 ; i < records.length; i++) {
             var rec = records[i];
+			$('#monitorLog').logview('dealLog', rec);
             var service = g_intance.getService(rec.svc_name);
             if (service != undefined) {
                 service.setStatus(rec);
@@ -126,12 +128,14 @@ function Server(desc, ip, port, isForeigner, cipher, user)
 				}
 			}
         }
+
+
 	};
 
 	this.getSvcStatu = function(){
 		if (Boolean(freshSvcStatuFlag))
 		{
-			var para = {service_id: this.monitorService, log_file_location:logFileLocation};
+			var para = {service_id: this.monitorService, log_file_location:logFileLocation, stat_file_location:statFileLocation};
 			this.getState("GetSvcStatus", para, dealSvcStatu);
 			freshSvcStatuFlag = false;
 		}

@@ -7,9 +7,7 @@ function Service(server, serviceId) {
     this.alive = 'dead';
     this.statArray = [];
     this.listItem = [];
-    this.statFileLocation = {};
     this.isDebugOpen = false;
-    this.debugFileLocation = {};
     this.server = server;
 };
 
@@ -17,6 +15,21 @@ Service.updataLag = 3000;
 
 Service.prototype.setStatus = function (record) {
     this.monitor_data = record;
+    var stats = record['stats'];
+    if (stats)
+    {
+        for(var i = 0; i < stats.length; i++)
+        {
+            var rec = stats[i];
+            var src = rec.Head.split('|');
+            var work = "{0}({1})".format(rec.Func, rec.FName);
+            var showTime = "{0}({1})".format(rec.time, rec.use);
+            var note ="{0}  thrid:{1} sid:{2}".format(rec.Dest, rec.ThreadIndex, rec.SessId);
+            var debugId = rec.DebugId;
+            var kk = {src: src[3], work: work, result: rec.Code, time:showTime, note: note, DebugId:debugId};
+            this.statArray.push(kk);
+        }
+    }
     if (this.monitor_data.status_run == 1 && this.monitor_data.status_alert == 0)
     {
         this.svcStyle = "svc_normal";
@@ -32,24 +45,6 @@ Service.prototype.setStatus = function (record) {
     {
         this.listSvcItem();
     }
-    //this.svc_name= record.svc_name;
-    //this.svc_region = record.svc_region;
-    //this.status = record.status;
-    //this.status_run = record.status_run;
-    //this.status_alert = record.status_alert;
-    //this.version = record.version;
-    //this.uptime = record.uptime;
-    //this.all_proc = record.all_proc;
-    //this.unproc = record.unproc;
-    //this.proc_speed = record.proc_speed;
-    //this.online_client = record.online_client;
-    //this.online_debug = record.online_debug;
-};
-Service.prototype.getStat = function (okFunc) {
-    var para = {service_id:this.serviceId,  stat_file_location:this.statFileLocation};
-    if (this.monitor_data.status_run == 1) {
-        this.server.getState("GetSvcStat", para, okFunc);
-    }
 };
 
 //关闭获取服务调试功能的定时器
@@ -57,96 +52,11 @@ Service.prototype.stopStat = function () {
   clearInterval(this.statTimer);
 };
 
-//获取单个功能码的具体通信信息
-function GetSvcDebug(debugId) {
-    var service = g_intance.getService(g_curServiceId);
-    service.getDebugInfo(debugId);
-}
-
-function operateFormatter(value, row, index) {
-    if (row.DebugId.length < 10)
-    {
-        return "";
-    }
-    var tmp = "<a href='#' onclick='GetSvcDebug(\"{0}\")' data-toggle='modal' data-target='#debugModal'><span class='glyphicon glyphicon-heart'></span></a>".format(row.DebugId);
-    //console.log(tmp);
-    return tmp;
-}
-
-Service.prototype.showStat = function () {
-    	 $('#table').bootstrapTable('destroy');
-		  var head = [
-              {title:"调试信息", filed:'debug', formatter: operateFormatter, align: 'center', valign: 'middle'},
-              {title: '来源',field:'src', align: 'center', valign: 'middle' },
-              {title: '业务',field:'work', align: 'center', valign: 'middle' },
-              {title: '结果',field: 'result', align: 'center', valign: 'middle'},
-              {title: '时间',field: 'time', align: 'center', valign: 'middle'},
-              {title: '备注',field: 'note', align: 'center', valign: 'middle'}
-          ];
-		$.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['zh-CN']);
-		$('#table').bootstrapTable({
-			columns:head,
-			data:this.statArray,
-            // detailView: true,
-			// striped: true,
-			// pagination: true,
-			// pageSize: 10,
-			 showRefresh: true,
-			 showToggle: true,
-			 showPaginationSwitch:true,
-             height: Math.round(window.screen.availHeight*0.4),
-			 search:true,
-		});
-        $('#table').attr('curPage', '业务状况');
-        $('#table').on('expand-row.bs.table', function (e, index, row, $detail) {
-        if (index % 2 == 1) {
-            $detail.html('Loading from ajax request...');
-            $.get('LICENSE', function (res) {
-                $detail.html(res.replace(/\n/g, '<br>'));
-            });
-        }
-    });
-};
-
-function showDebugInfo(data, serviceId) {
-    var service = g_intance.getService(serviceId);
-    var obj = JSON.parse(data);
-    service.debugFileLocation = obj.debug_file_location;
-    var packet = obj.packet;
-    if (packet == undefined)
-        return;
-
-    var nodeReq = {text: '请求', nodes:[]};
-    $.each(packet.Req, function (name, value) {
-        var node = {text: "{0} = {1}".format(name, value)};
-        nodeReq.nodes.push(node);
-    });
-    var nodeRsp = {text: '回复', nodes:[]};
-    var rsps = packet.Rsp;
-    if (rsps != undefined) {
-        for (var i = 0; i < rsps.length; i++) {
-            var node = {text: "{0}".format(i + 1), nodes: []};
-            var rsp = rsps[i];
-            if (rsp == undefined)
-                continue;
-            $.each(rsp, function (name, value) {
-                var leaf = {text: "{0} = {1}".format(name, value)}
-                node.nodes.push(leaf);
-            });
-            nodeRsp.nodes.push(node);
-        }
-    }
-    var tree =[nodeReq, nodeRsp];
-    $('#debugModalBody').treeview({
-		data:tree
-	});
-}
-
-Service.prototype.getDebugInfo = function(debugID) {
+Service.prototype.getDebugInfo = function(debugID, okFun) {
     var tmpArr = debugID.split('-');
     var para = {service_id:this.serviceId, date:parseInt(tmpArr[0]), index:parseInt(tmpArr[1]), debug_file_location:parseInt(tmpArr[2])};
-    this.server.serverRequest("GetSvcDebug",para, showDebugInfo);
-}
+    this.server.serverRequest("GetSvcDebug",para, okFun);
+};
 
 Service.prototype.openDebugFunc = function(){
     if (!Boolean(this.isDebugOpen))
@@ -278,8 +188,8 @@ Service.prototype.showLog = function (fileType, okFunc) {
     var para = {};
     para.service_id = this.serviceId;
     if (fileType == '操作日志')
-        para.fileName = "{0}_{1}.log".format(this.serviceId, this.getCurDate());
+        para.fileName = "{0}_{1}.txt".format(this.serviceId, this.getCurDate());
     else if (fileType == 'sql日志')
-        para.fileName = "{0}_sql_{1}.log".format(this.serviceId, this.getCurDate());
+        para.fileName = "{0}_sql_{1}.txt".format(this.serviceId, this.getCurDate());
     this.server.serverRequest("ListSvcLogInfo", para, okFunc);
 }

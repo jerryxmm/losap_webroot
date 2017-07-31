@@ -65,7 +65,7 @@
           </div>
           <div class="panel-body" style="padding: 0px 15px 0px 15px; min-height: 400px">
               <ul id = "monitorItemNav" class="nav nav-tabs">
-                  <li class="active"><a href='' data-toggle='tab' ng-click="showSvcStat(curSvc.serviceId)">业务状况</a></li>
+                  <li class="active"><a href='' data-toggle='tab' ng-click="initStat()">业务状况</a></li>
                   <li ng-repeat="item in curSvc.listItem" ng-if="item.show == 1"><a href='' data-toggle='tab' ng-click="ListSvcItemInfo(item)">{{item.name}}</a></li>
               </ul>
               <div id="monitorItemTab">
