@@ -2,7 +2,7 @@
 <div class="row tab-pane">
     <div class="col-lg-2 col-md-2">
         <ul id="sidebar" class='nav nav-list'>
-            <li ng-repeat="svc in serviceList">
+            <li ng-repeat="svc in serviceList" ng-class="svc.serviceId == curSvc.serviceId ? 'active' : ''">
                 <a class='list-group-item' ng-click='setCurSvc(svc)'>
                 <span class="glyphicon" ng-class="{'svc_normal': 'glyphicon-play green', 'svc_alter': 'glyphicon-play red','svc_disconnect': 'glyphicon-stop grey'}[svc.svcStyle]"></span>
                 {{svc.serviceId}}</a>
