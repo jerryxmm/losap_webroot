@@ -129,6 +129,7 @@ app.controller("detailView_ctrl", ['$scope', '$interval', '$timeout', '$statePar
     };
     $scope.ListSvcItemInfo = function(item)
     {
+        $('#table').attr('curPage', item);
         $scope.curSvc.listSvcItemInfo(item, showListSvcInfo);
     };
     detailViewScope = $scope;

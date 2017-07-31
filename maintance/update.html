@@ -1,0 +1,9 @@
+<div class="tab-pane">
+    <div class="maintance">
+          <label class="control-label uploadLable"> 选择升级包</label>
+          <form id = "updateBinForm" target="index.html" method="post" action="/action/upgrade" enctype="multipart/form-data" >
+              <input id = "updatePackage" name="FileZip" type="file" class="file" data-show-preview="false" data-allowed-file-extensions='["zip"]'>
+            </form>
+          <button id = "updateBtn" type="button" class="btn btn-default" onclick="updateBin()">升级</button>
+    </div>
+</div>

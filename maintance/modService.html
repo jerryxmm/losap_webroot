@@ -1,0 +1,17 @@
+<div class="row tab-pane">
+    <div id="modServiceSidebar" class="col-lg-2 col-md-2">
+        <li ng-repeat="svc in serviceList"><a class='list-group-item' href='' ng-click='showXmlConfig(svc)'>
+            <span ng-class="{0:'glyphicon-stop red', 1:'glyphicon-play green'}[svc.monitor_data.status_run]" class='glyphicon'></span>{{svc.serviceId}}</a></li>
+    </div>
+    <div class="col-lg-10 col-md-10">
+        <div class="row">
+              <div class="pull-left" style="margin-left: 1%; margin-top:20px ">
+                  <h4 style="font-weight:bold;">{{curSvc.serviceId}} 配置文件</h4>
+              </div>
+              <div class="pull-right" style="margin-right: 3%;  margin-top:20px">
+                   <button type='button' class='btn btn-default' ng-click="saveXmlConfig()">保存配置文件</button>
+              </div>
+        </div>
+        <textarea cols="30" rows="5" style="width: 90%;min-height: 500px" ng-model="xmlContent"></textarea>
+     </div>
+</div>

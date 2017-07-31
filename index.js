@@ -72,7 +72,6 @@ app.controller('pageTab_ctrl', ['$scope','$interval','$location','$state',
         });
     };
     function fresh(){
-        console.log("in index interval!!!");
         var serverList = g_intance.serverList();
         for (var i = 0; i < serverList.length; i++) {
             var server = serverList[i];

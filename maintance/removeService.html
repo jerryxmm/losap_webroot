@@ -1,0 +1,14 @@
+<div class="tab-pane">
+    <div class="maintance">
+        <div class="removeSvc">
+        <h3>删除服务列表</h3>
+    </div>
+        <div class="row-fluid removeSvc">
+      <div id = "removeSvcList" class="list-group col-lg-8 col-md-8">
+          <a ng-repeat="svc in serviceList" ng-class="{1:'disabled'}[svc.monitor_data.status_run]" href=""  ng-click="removeService('{0}')" class="list-group-item">
+              <span class="glyphicon glyphicon-minus-sign pull-right red"></span>
+              {{svc.serviceId}}</a>
+      </div>
+  </div>
+    </div>
+</div>
